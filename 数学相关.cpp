@@ -18,8 +18,6 @@ using namespace std;
 const int e = 1000000007;
 typedef long long LL;
 
-int k1,k2;
-
 LL fermat( LL a, LL d ){
 	LL ans = 1;
 	while(d){
@@ -62,11 +60,6 @@ vector<LL> matrixPower( vector<LL>& p, LL d ){ //µ›πÈ–¥∑®
 int main(){
     freopen("in.txt","r",stdin);
     freopen("out.txt","w",stdout);
-	scanf("%lld%lld", &k1, &k2);
-	LL mat[] = {
-		(k1*k1+k2)%e, k2*k1%e,
-		k1,	k2
-	};
-	vector<LL> initM;
+	
     return 0;
 }
