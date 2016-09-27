@@ -101,3 +101,20 @@ LL digitDP( LL n ){ // 计算从1到（n-1）的计数
 	}
 	return dp1[m][0]+dp2[m][0];
 }
+
+// n 位 m 进制 状态压缩
+// 状态数小，转移方程不规则，每次转移步骤计数加一，问题求取最少步骤数的，可考虑BFS
+inline void stateDecode( int s, int& n, int* state ){
+	int m = n;// m == n
+	for( int i(0); i < n ; i++ ){
+		state[i] = s%m;
+		s /= m;
+	}
+}
+inline int stateEncode( int &n, int* state, int* _base){
+	int s= 0;
+	for( int i(0); i < n ; i++ ){
+		s += _base[i]*state[i];
+	}
+	return s;
+}
