@@ -34,3 +34,111 @@ void Dijkstra(int st){
 		} 
 	} 
 }
+
+// 最大流算法 限时吃紧的情况下请尽量压缩n的大小，测试样例未必极端
+int head[maxn],p[maxn],d[maxn],cur[maxn],num[maxn];
+bool vis[maxn];
+struct Edge{
+	int from, to, cap, flow, next;
+}edges[maxn*maxn];
+struct ISAP{
+	int n,m,s,t;
+	//vector<Edge> edges;
+	
+	void init(int n){
+		this->n = n;
+		//edges.clear();
+		m = 0;
+		memset( head, -1, sizeof(int)*n );
+	};
+
+	void addEdge( int from, int to, int cap){
+		//Edge e1(from, to, cap, 0 );
+		edges[m].from = from, edges[m].to = to, edges[m].cap = cap, edges[m].flow = 0, edges[m].next = head[from];
+		//e1.next = head[from];
+		head[from] = m++;
+		//edges.push_back( e1 );
+
+		//Edge e2(to, from, 0, 0 );
+		edges[m].from = to, edges[m].to = from, edges[m].cap = 0, edges[m].flow = 0, edges[m].next = head[to];
+		//e2.next = head[to];
+		head[to] = m++;
+		//edges.push_back( e2 );
+	}
+
+	void backwardBFS(){	
+		memset( vis, 0 , sizeof(bool)*n ); // 注意bool型与int型大小不一样哦
+		queue<int> Q;
+		Q.push(t); d[t] = 0; vis[t] =true;
+		while( !Q.empty() ){
+			int u = Q.front(); Q.pop();
+			for( int h = head[u] ; h!=-1; h = edges[h].next ){
+				Edge& e = edges[h^1];
+				if( !vis[e.from] && e.cap > e.flow ){
+					vis[e.from] = 1;
+					d[e.from] = d[u] + 1;
+					Q.push( e.from );
+				}
+			}
+		}
+		//return vis[s];
+	}
+	// 不使用使用dfs递归地实现找增广路(并且实现同时增广多条)，而是从源点开始一条一条地找
+	// 找到后对整条路径进行增广操作。
+	int Augmetn(){
+		int u = t, a = INT_MAX;
+		while( u != s ){
+			Edge &e = edges[p[u]];
+			a = min( a, e.cap-e.flow );
+			u = e.from;
+		}
+		u = t;
+		while( u != s ){
+			edges[p[u]].flow += a;
+			edges[p[u]^1].flow -= a;
+			u = edges[p[u]].from;
+		}
+		return a;
+	}
+	int Maxflow( int s, int t){
+		this->s = s; this->t = t;
+		int flow = 0;
+		memset( d, 0, sizeof(int)*n );
+		backwardBFS();
+		memset( num, 0, sizeof(int)*n );
+		for(int i(0) ; i < n ; i++ ) num[d[i]]++;
+		int u = s;
+		memcpy( cur, head, sizeof(int)*n );
+		while( d[s] < n ){ // 任存在从s到t的路径
+			if( u == t ){ // DFS到达汇点
+				flow += Augmetn();
+				u = s;
+			}
+			int ok = 0; // 阻塞标记
+			for( int h = cur[u] ; h!=-1 ; h = edges[h].next ){
+				Edge& e = edges[h];
+				if( e.cap > e.flow && d[u] == d[e.to] + 1 ){ // Advance
+					ok = 1;
+					p[e.to] = h;
+					cur[u] = h;
+					u = e.to;
+					break;
+				}
+			}
+
+			if( !ok ){
+				int m = n-1;	// Retreat
+				// 被阻塞不一定是没有路可走，而是该路不满足d的条件，需要更新d
+				for( int h = head[u] ; h != -1 ; h = edges[h].next ){
+					Edge& e = edges[h];
+					if(e.cap > e.flow) m = min(m, d[e.to] );
+				}	// d[u] 严格递增
+				if( --num[d[u]] == 0 ) break; // gap 优化
+				num[d[u] = m+1 ] ++;
+				cur[u] = head[u];
+				if( u!=s ) u = edges[p[u]].from;
+			}
+		}
+		return flow;
+	}
+};
