@@ -44,3 +44,71 @@ struct Trie
 		return val[u]; 
 	} 
 }; 
+
+// persistent segment tree
+struct PSegmentTree{
+	int from,to;
+	int NEXT_FREE_INDEX;
+	int iL, iR; 
+	int val;
+	int ret;
+
+	int update( int intervalLeft, int intervalRight, int value , int versionRootIdx){
+		this->iL = intervalLeft, this->iR = intervalRight, this->val = value;
+		return upd( versionRootIdx, from, to );
+	}
+	int query( int intervalLeft, int intervalRight, int versionRootIdx){
+		this->iL = intervalLeft, this->iR = intervalRight;
+		ret = -1; // initialization
+		qry( versionRootIdx, from, to );
+		return ret;
+	}
+	int built( int from, int to ){
+		this->from = from, this->to = to;
+		NEXT_FREE_INDEX = 0; // initialization
+		return blt( from,to );
+	}
+protected:
+	int upd( int idx, int l, int r ){
+		int Idx = NEXT_FREE_INDEX++; // index of the node in new version of segment tree
+		s[Idx] = s[idx]; // new node always should be initialized with the value of the previous version
+		Lc[Idx] = Lc[idx], Rc[Idx] = Rc[idx]; // as well as the pointer
+
+		if( iL <= l && iR >= r ){ // this node is completely covered by the interval
+			s[Idx] = max( s[idx], val );
+			return Idx;
+		}		
+		int mid = l+(r-l)/2;
+		if( iL <= mid ) 
+			Lc[Idx] = upd( Lc[idx], l, mid );
+		if( iR > mid )
+			Rc[Idx] = upd( Rc[idx], mid+1, r);
+		return Idx;
+	}
+	void qry( int idx, int l, int r ){
+		ret = max( ret, s[idx] ); // update answer;
+		if( iL <= l && iR >= r )
+			return;
+
+		int mid = l+(r-l)/2;
+		if( iL <= mid )
+			qry( Lc[idx], l, mid );
+		if( iR > mid )
+			qry( Rc[idx], mid+1, r);
+	}
+	int blt( int l, int r ){
+		int Idx = NEXT_FREE_INDEX++;
+		if( l == r ){ // leaf node
+			s[Idx] = 1;
+			return Idx;
+		}
+		int mid = l+(r-l)/2;
+		Lc[Idx] = blt( l, mid );
+		Rc[Idx] = blt( mid+1, r);
+		maintain(Idx); // if s[Idx] = f( s[Lc[Idx]], s[Rc[Idx]] ) 
+		return Idx;
+	}
+	inline void maintain( int Idx ){//维护节点信息,!!!这里确保节点不能是叶子节点 
+		s[Idx] = max( s[Lc[Idx]], s[Rc[Idx]] );
+	} 
+};

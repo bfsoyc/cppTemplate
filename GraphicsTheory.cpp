@@ -142,3 +142,38 @@ struct ISAP{
 		return flow;
 	}
 };
+
+// dfs序，非递归
+// DI: 入序， DO: 出序， L:层次
+int fa[maxn],cur[maxn];
+vector<int> getDFSOrder( int rootIdx, int *headIdx, int *DI, int *DO, int* L ){	
+	vector<int> D;
+	memset( DI, -1,sizeof(cur) ); 
+	memcpy( cur, headIdx, sizeof(cur) );
+	int u(rootIdx), v(rootIdx), h;
+	fa[rootIdx] = -1;
+	// 根节点
+	DI[rootIdx]=D.size(),L[rootIdx]=1;
+	D.push_back(rootIdx);
+	while( u >= 0 ){
+		u = v;
+		DO[u] = D.size()-1;
+		if( cur[u] == -1 ){
+			v = fa[u];
+			continue;
+		}
+		h = cur[u];
+		v = edges[h].v;
+		cur[u] = edges[h].next;	// 删除该边，每条边只用一次		
+		if( DI[v] == -1 ){ // first visit
+			DI[v] = D.size();
+			D.push_back( v );
+			fa[v] = u;
+			L[v] = L[fa[v]]+1;
+		}
+		else{//一条回溯的边，我们不处理
+			v = u;
+		}
+	}
+	return D;
+}
