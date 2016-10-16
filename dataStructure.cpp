@@ -1,6 +1,3 @@
-
-
-
 // 字典树
 struct Trie 
 { 
@@ -44,7 +41,59 @@ struct Trie
 		return val[u]; 
 	} 
 }; 
-
+// 线段树
+struct SegmentTree{
+	int from,to;
+	int iL,iR;	
+	int val,ret;
+	void built( int from, int to ){
+		this->from = from, this->to = to;
+		blt( 1, from, to);
+	}
+	void update( int intervalLeft, int intervalRight, int value){
+		this->iL = intervalLeft, this->iR = intervalRight, this->val = value;
+		upd( 1, from, to);
+	}
+	int query( int intervalLeft, int intervalRight ){
+		this->iL = intervalLeft, this->iR = intervalRight;
+		ret = 0;
+		qry( 1, from, to );
+		return ret;
+	}
+protected:
+	void blt( int idx, int l, int r){
+		if( l == r ){ // leaf node
+			s[idx] = 0;
+			return;
+		}
+		int mid = l+(r-l)/2;
+		blt( idx*2, l, mid );
+		blt( idx*2+1, mid+1, r);
+		maintain(idx);
+	}
+	void maintain(int idx){
+		s[idx] = s[idx*2]+s[idx*2+1];
+	}
+	void upd( int idx, int l, int r ){
+		if( iL <= l && iR >= r ){
+			s[idx] += val;
+			return;
+		}
+		int mid = l+(r-l)/2;
+		if( iL <= mid )	upd( idx*2,l,mid);
+		if( iR > mid ) upd( idx*2+1, mid+1, r);
+		maintain(idx);
+	}
+	void qry( int idx, int l, int r ){
+		if( iL <= l && iR >= r ){
+			ret += s[idx];
+			return;
+		}
+		int mid = l+(r-l)/2;
+		if( iL <= mid )	qry( idx*2,l,mid);
+		if( iR > mid ) qry( idx*2+1, mid+1, r);
+	}
+};
 // persistent segment tree
 struct PSegmentTree{
 	int from,to;
@@ -112,3 +161,68 @@ protected:
 		s[Idx] = max( s[Lc[Idx]], s[Rc[Idx]] );
 	} 
 };
+
+
+// Range minimun query, dp[i][j]:以位置i开始，长度为2^j的区间的最小值所在的位置
+// ST sparse table 的方法
+void RMQ_init( int* A, int n){ // initialize on A[0...n-1]
+	for( int i = 0 ; i < n ; i++ ) dp[i][0] = i; // A[i]
+	for( int j = 1; (1<<j) <= n ; j++ )
+		for( int i = 0 ; i + (1<<j) -1 < n ; i++ )
+			dp[i][j] = A[ dp[i][j-1] ] < A[ dp[i+(1<<(j-1))][j-1] ] ? dp[i][j-1]:dp[i+(1<<(j-1))][j-1];
+}
+int RMQ( int L, int R, int *A ){
+	int k = 0;
+	while ( (1<<(k+1)) <= R-L+1 ) k++ ; // 如果2^(k+1) <= R-L+1, 那么k可以加1
+	return A[ dp[L][k] ] < A[ dp[R-(1<<k)+1][k] ] ? dp[L][k]:dp[R-(1<<k)+1][k];
+}
+
+// 计算后缀数组 O(nlogn)
+int cntA[maxn],cntB[maxn],rnk[maxn],A[maxn],B[maxn],tsa[maxn]; // 基数排序辅助数组
+int ch[maxn],height[maxn],sa[maxn]; // ch:将字符数组转化后得到的字符数组， sa:排序后的后缀数组， height[i]: sa[i]与sa[i-1]所代表的后缀的最长公共前缀
+const int maxC = 1026;
+void getSuffixArray(int n){
+	// 一定注意初始化 ch
+    for (int i = 0; i < maxC; i ++) cntA[i] = 0; // 所有对cntA的操作为基数排序操作 
+    for (int i = 1; i <= n; i ++) cntA[ch[i]] ++;
+    for (int i = 1; i < maxC; i ++) cntA[i] += cntA[i - 1];
+    for (int i = n; i; i --) sa[cntA[ch[i]] --] = i; // sa是排序后的索引
+    rnk[sa[1]] = 1;
+    for (int i = 2; i <= n; i ++){
+        rnk[sa[i]] = rnk[sa[i - 1]];
+        if (ch[sa[i]] != ch[sa[i - 1]]) rnk[sa[i]] ++;
+    }// 此处rnk得到对单字母(长度为1的子串）的序， aabaaaab 得到 11211112
+    for (int l = 1; rnk[sa[n]] < n; l <<= 1){
+		// 将（已排序的）长度为L的子串构成长度为2*L的子串，用双关键字排序
+        for (int i = 0; i <= n; i ++) cntA[i] = 0;
+        for (int i = 0; i <= n; i ++) cntB[i] = 0;
+        for (int i = 1; i <= n; i ++)
+        {
+            cntA[A[i] = rnk[i]] ++;
+            cntB[B[i] = (i + l <= n) ? rnk[i + l] : 0] ++;
+        }
+        for (int i = 1; i <= n; i ++) cntB[i] += cntB[i - 1];
+        for (int i = n; i; i --) tsa[cntB[B[i]] --] = i; // tsa 是排序后（后半段L长的子串）的索引
+        for (int i = 1; i <= n; i ++) cntA[i] += cntA[i - 1];
+        for (int i = n; i; i --) sa[cntA[A[tsa[i]]] --] = tsa[i]; // 从tsa[n] 到tsa[i]，从第二关键字最大的开始
+        rnk[sa[1]] = 1;
+        for (int i = 2; i <= n; i ++){
+            rnk[sa[i]] = rnk[sa[i - 1]];
+            if (A[sa[i]] != A[sa[i - 1]] || B[sa[i]] != B[sa[i - 1]]) rnk[sa[i]] ++;
+        }
+    }// 此处得到后缀数组suffix array 及其 rank
+    for (int i = 1, j = 0; i <= n; i ++){
+		// 基于这样一个事实 suffix(k-1) 排在 suffix(i-1)(rank[i-1])的前一位，那么suffix(k)肯定在suffix(i)前,他们最大前缀是H[rank[i-1]]-1
+		// 故H[rank[i]] >= H[rank[i-1]-1];
+        if (j) j --; // 相当于初始化为 height[rnk[i-1]]
+        while (ch[i + j] == ch[sa[rnk[i] - 1] + j]) j ++;
+		// 当前计算Height of suffix(i), ch[i+j]是suffix(i)的第j+1个字符，尽管可能还没计算H[rank[i]-1]，但是我们已经知道他们最大前缀至少是j了,继续往后比较知道不相同字符为止
+        height[rnk[i]] = j;
+    }
+} 
+
+
+// 在二分查找的问题中，通常在闭区间内[l,r]内寻找目标位置，当区间长度为2时，出现l==mid的情况。
+// 为了避免死循环，查询区间的更新应该是[mid+1,r]与[l,mid]之一。而我们的查找的目标位置应该改为原位置下一位置。
+
+// 求取最大区间的问题中，若存在贪心算法，在固定一个端点的情况下，可以利用倍增区间长度的方法寻找另一个端点（先倍增，再二分）

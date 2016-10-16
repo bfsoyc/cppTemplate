@@ -73,7 +73,8 @@ Point getLineCircleIntersection( Point& A, Point& B, Circle C){
 
 double includedAngle( Vector& a, Vector& b){
 	// |a|,|b| ²»µÈÓÚ0
-	return acos(Dot(a,b)/(Length(a)*Length(b)));
+	double c = Dot(a,b)/(Length(a)*Length(b));
+	return acos(max(-1.0,min(c,1.0))); // refine the value of c 
 }
 
 double TriagnleCircleIntersectionArea( Circle& C, Point& A, Point& B, bool inner){
