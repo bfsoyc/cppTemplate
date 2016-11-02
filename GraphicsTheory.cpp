@@ -283,6 +283,37 @@ struct LCA{
 	}
 };
 
+// LCA 离线查询 O(n+#query）
+int root[maxn],vis[maxn],lca[maxn*2];	// 每天查询也以边的形式记录(双向),其结果存于lca中，别用vector<vector<int>>
+struct Tarjan{
+	void process(int n, int rootIdx){// n: 最大结点编号加1
+		for( int i(0) ; i < n ; i++ )
+			root[i] = i;
+		memset( vis,0,sizeof(int)*n );
+		DFS( rootIdx );
+	}
+
+	int find( int x ){ return root[x]==x? x:root[x]=find(root[x]);} 
+
+	void DFS( int u ){
+		vis[u] = 1;
+		for( int i = head[u] ; i != -1 ; i = edges[i].next ){
+			int v = edges[i].v;
+			if( vis[v] ) continue;
+			// first visit
+			// 递归调用
+			DFS( v );					
+			// 将u与以其子节点v为根的子树合并
+			root[v] = u;
+		}
+		// 处理与u相关的查询
+		for( int h = queriesHead[u] ; h!=-1 ; h = queries[h].next )
+			if( vis[queries[h].v] )
+				lca[h] = lca[h^1] = find( queries[h].v ) ;
+	}
+};
+
+
 // 并查集 
 //带路径压缩的找根结点函数 
 int find(int x){return root[x]==x?x:root[x]=find(root[x]);} 

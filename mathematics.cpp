@@ -86,7 +86,7 @@ vector<int> primeDecomposition( LL n ){ // 对整数n作素数唯一性分解
 	vector<int> ret;
 	while( primeList[i] <= n ){
 		ret.push_back(0);
-		while( !n%primeList[i] ){
+		while( !(n%primeList[i]) ){
 			n/=primeList[i];
 			ret[i]++;
 		}
@@ -108,6 +108,46 @@ LL getDividors(LL num){  // 获得数 num 的约数的个数O(sqrt(num)) 的复杂度
     return count;  
 }  
 
+// 因子枚举
+void dfs(int idx, int sum, vector<int> &pos, vector<int> &Pcnt, vector<int>& factors, LL& sq){
+	if( sum > sq ) return;
+	if( idx==pos.size() ){
+		factors.push_back(sum);
+		return;
+	}
+	int f(1);
+	for( int i(0); i <= Pcnt[idx]; i++ ){
+		dfs(idx+1, sum*f, pos, Pcnt, factors, sq);
+		f *= primeList[pos[idx]];
+	}
+}
+void getFactors( LL n, vector<int>& factors ){
+	// 我们只需要枚举小于sqrt(n)的因子即可，若x是n的小于sqrt(n)的一个因子，自然地n/x是x的一个大于sqrt(n)的因子
+	// 通过n的素因子的组合得到n的因子，对于大于sqrt(n)的素因子是不需考虑的。
+	// primeList 是素数表
+	LL sq = sqrt(n)+1; // LL for reason
+	if( sq*sq > n ) sq--;
+	vector<int> pos, Pcnt;
+	int i(0);
+	while( primeList[i] <= sq && primeList[i]<= n){
+		if( !(n%primeList[i]) ){
+			int cnt(0);
+			while( !(n%primeList[i]) ){
+				n/=primeList[i];
+				cnt++;
+			}
+			Pcnt.push_back(cnt);
+			pos.push_back(i);
+		}
+		i++;
+	}
+	// n的素因子个数（包括重复的）不会很多， 2^20已经达到10^6级别了。
+	// 所以n的因子个数不会很多，假设n有7个因子2,7个因子3,7个因子5,也只有8^3种不同的组合
+	factors.clear();
+	dfs(0, 1, pos, Pcnt, factors, sq);
+}
+
+//
 LL gcd( LL a, LL b ){
 	return a%b==0 ? b: gcd(b,a%b);
 }

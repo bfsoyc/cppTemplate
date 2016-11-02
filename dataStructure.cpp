@@ -41,7 +41,7 @@ struct Trie
 		return val[u]; 
 	} 
 }; 
-// 线段树
+// 线段树 (lazy mark)
 struct SegmentTree{
 	int from,to;
 	int iL,iR;	
@@ -62,8 +62,9 @@ struct SegmentTree{
 	}
 protected:
 	void blt( int idx, int l, int r){
+		lazy[idx] = -1; // 初始化懒标记
 		if( l == r ){ // leaf node
-			s[idx] = 0;
+			s[idx] = a[l];
 			return;
 		}
 		int mid = l+(r-l)/2;
@@ -72,13 +73,24 @@ protected:
 		maintain(idx);
 	}
 	void maintain(int idx){
-		s[idx] = s[idx*2]+s[idx*2+1];
+			s[idx] = s[idx*2] + s[idx*2+1];
+	}
+	void pushdown(int idx, int l, int r){ // 如果需要知道子节点的区间长度，需要利用l，r
+		if( lazy[idx] == -1 ) return;
+		lazy[idx*2] = lazy[idx*2+1] = lazy[idx];		
+		// 传递标记后更新子结点需要维护的值，仅仅传递标记的话，结点自身的值肯定正确的。
+		int mid = l+(r-l)/2;
+		int len1 = mid-l+1, len2 = r-mid;
+		s[idx*2] = len1*lazy[idx*2], s[idx*2+1] = len2*lazy[idx*2+1]; 
+		lazy[idx] = -1; // -1 表示消除懒标记, 懒标记不为-1的结点，对应的区间所维护的值应该是正确的
 	}
 	void upd( int idx, int l, int r ){
 		if( iL <= l && iR >= r ){
-			s[idx] += val;
+			lazy[idx] = val;
+			s[idx] = val*(r-l+1); // 懒标记的更新一定伴随维护值的更新
 			return;
 		}
+		pushdown(idx,l,r); // 懒标记的下传递
 		int mid = l+(r-l)/2;
 		if( iL <= mid )	upd( idx*2,l,mid);
 		if( iR > mid ) upd( idx*2+1, mid+1, r);
@@ -89,11 +101,17 @@ protected:
 			ret += s[idx];
 			return;
 		}
+		pushdown(idx,l,r); // 懒标记的下传递
 		int mid = l+(r-l)/2;
 		if( iL <= mid )	qry( idx*2,l,mid);
-		if( iR > mid ) qry( idx*2+1, mid+1, r);
+		if( iR > mid ) qry( idx*2+1, mid+1, r);		
 	}
 };
+// 对于区间修改的问题中，通常使用懒标记，不同类型的区间修改使用不同懒标记，并且这些懒标记具有不同
+// 优先级，有两个地方会修改懒标记，区间修改与pushdown操作，均要对次优先级的标记进行特殊处理
+
+// f(i,j)为对数组区间[i,j]内的数的操作，若要求所有f(i,j)的和，则分治是很好的思路，线段树是很适合的数据结构
+
 // persistent segment tree
 struct PSegmentTree{
 	int from,to;
@@ -226,3 +244,8 @@ void getSuffixArray(int n){
 // 为了避免死循环，查询区间的更新应该是[mid+1,r]与[l,mid]之一。而我们的查找的目标位置应该改为原位置下一位置。
 
 // 求取最大区间的问题中，若存在贪心算法，在固定一个端点的情况下，可以利用倍增区间长度的方法寻找另一个端点（先倍增，再二分）
+
+//单调队列求最小值是个很经典的问题。
+//单调队列维护的是当前仍可能作为最小值的数。
+//我们可以拓展为：一个数从队列弹出一次表示当前窗口下，右边有一个数比他小，同样的思路，将刚弹出的数插入一个新的单调队列，当其再弹出时，便不用对其再做考虑了。所以这两个队列同时维护仍可能作为次小值的数。
+//由于是单调的，对比队列1的第两个元素（如果存在）与队列2的队首元素（如果存在）便得到次小值。
