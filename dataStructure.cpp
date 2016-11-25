@@ -1,9 +1,9 @@
 // 字典树
+int ch[maxnode][sigma_size];  //maxnode为字典树最大结点容量（一般为sigma_size*字符串长度），sigma_size为字符集大小（每个结点最多子结点数） 
+int val[maxnode];//每个结点信息 
 struct Trie 
 { 
-	int ch[maxnode][sigma_size]; 
-	//maxnode为字典树最大结点容量（一般为sigma_size*字符串长度），sigma_size为字符集大小（每个结点最多子结点数） 
-	int val[maxnode];//每个结点信息 
+	
 	int sz;//目前树中的结点数 
 	void init_Trie(){
 		sz=1;memset(ch[0],0,sizeof(ch[0]));
@@ -30,7 +30,6 @@ struct Trie
 			val[u]=v; 
 	} 
 	bool _find(char *s){//未测试 
-		int len=strlen(s),tmp; 
 		int u=0,n=strlen(s); 
 		for(int i=0;i<n;i++){ 
 			int c=s[i]-'a'; 
@@ -41,6 +40,7 @@ struct Trie
 		return val[u]; 
 	} 
 }; 
+
 // 线段树 (lazy mark)
 struct SegmentTree{
 	int from,to;
@@ -113,60 +113,91 @@ protected:
 // f(i,j)为对数组区间[i,j]内的数的操作，若要求所有f(i,j)的和，则分治是很好的思路，线段树是很适合的数据结构
 
 // persistent segment tree
+// with lazy mark
+LL s[maxn*logn],lazy[maxn*logn];
+int sid[maxn*logn],Lc[maxn*logn],Rc[maxn*logn];
 struct PSegmentTree{
 	int from,to;
 	int NEXT_FREE_INDEX;
 	int iL, iR; 
-	int val;
-	int ret;
+	LL val;
+	LL ret;
 
-	int update( int intervalLeft, int intervalRight, int value , int versionRootIdx){
+	int update( int intervalLeft, int intervalRight, LL value , int versionRootIdx){
 		this->iL = intervalLeft, this->iR = intervalRight, this->val = value;
 		return upd( versionRootIdx, from, to );
 	}
-	int query( int intervalLeft, int intervalRight, int versionRootIdx){
-		this->iL = intervalLeft, this->iR = intervalRight;
-		ret = -1; // initialization
-		qry( versionRootIdx, from, to );
-		return ret;
-	}
+	//int query( int intervalLeft, int intervalRight, int versionRootIdx){
+	//	this->iL = intervalLeft, this->iR = intervalRight;
+	//	ret = 0; // initialization
+	//	qry( versionRootIdx, from, to );
+	//	return ret;
+	//}
 	int built( int from, int to ){
 		this->from = from, this->to = to;
 		NEXT_FREE_INDEX = 0; // initialization
 		return blt( from,to );
 	}
 protected:
+	void pushdown(int idx){
+		if( lazy[idx]==0 ) return;
+		
+		int Idx = NEXT_FREE_INDEX++;
+		int lc = Lc[idx];
+		lazy[Idx] = lazy[lc]+lazy[idx], s[Idx] = s[lc]+lazy[idx], 
+		sid[Idx] = sid[lc];
+		Lc[Idx] = Lc[lc], Rc[Idx] = Rc[lc];
+		Lc[idx] = Idx;
+		Idx = NEXT_FREE_INDEX++;
+		int rc = Rc[idx];
+		lazy[Idx] = lazy[rc]+lazy[idx], s[Idx] = s[rc]+lazy[idx];
+		sid[Idx] = sid[rc];
+		Lc[Idx] = Lc[rc], Rc[Idx] = Rc[rc];
+		Rc[idx] = Idx;
+
+		lazy[idx] = 0;
+	}
 	int upd( int idx, int l, int r ){
+		
 		int Idx = NEXT_FREE_INDEX++; // index of the node in new version of segment tree
+		if( NEXT_FREE_INDEX > maxNode ) a[-1] = 0;
 		s[Idx] = s[idx]; // new node always should be initialized with the value of the previous version
+		lazy[Idx] = lazy[idx], sid[Idx] = sid[idx];
 		Lc[Idx] = Lc[idx], Rc[Idx] = Rc[idx]; // as well as the pointer
 
 		if( iL <= l && iR >= r ){ // this node is completely covered by the interval
-			s[Idx] = max( s[idx], val );
+			// be very careful to add INF to lazy mark
+			lazy[Idx] += val;
+			s[Idx] += val;
 			return Idx;
-		}		
+		}
+		// typically we wouldn't change anything in the old version, so for pushdown operation, we create two temporary new node
+		pushdown( Idx );
 		int mid = l+(r-l)/2;
 		if( iL <= mid ) 
-			Lc[Idx] = upd( Lc[idx], l, mid );
+			Lc[Idx] = upd( Lc[Idx], l, mid );
 		if( iR > mid )
-			Rc[Idx] = upd( Rc[idx], mid+1, r);
+			Rc[Idx] = upd( Rc[Idx], mid+1, r);
+		maintain(Idx);
 		return Idx;
 	}
-	void qry( int idx, int l, int r ){
-		ret = max( ret, s[idx] ); // update answer;
-		if( iL <= l && iR >= r )
-			return;
+	//void qry( int idx, int l, int r ){
+	//	ret = max( ret, s[idx] ); // update answer;
+	//	if( iL <= l && iR >= r )
+	//		return;
 
-		int mid = l+(r-l)/2;
-		if( iL <= mid )
-			qry( Lc[idx], l, mid );
-		if( iR > mid )
-			qry( Rc[idx], mid+1, r);
-	}
+	//	int mid = l+(r-l)/2;
+	//	if( iL <= mid )
+	//		qry( Lc[idx], l, mid );
+	//	if( iR > mid )
+	//		qry( Rc[idx], mid+1, r);
+	//}
 	int blt( int l, int r ){
 		int Idx = NEXT_FREE_INDEX++;
 		if( l == r ){ // leaf node
-			s[Idx] = 1;
+			s[Idx] = prefix[l];
+			sid[Idx] = l;
+			lazy[Idx] = 0;
 			return Idx;
 		}
 		int mid = l+(r-l)/2;
@@ -177,7 +208,8 @@ protected:
 	}
 	inline void maintain( int Idx ){//维护节点信息,!!!这里确保节点不能是叶子节点 
 		s[Idx] = max( s[Lc[Idx]], s[Rc[Idx]] );
-	} 
+		sid[Idx] = s[Lc[Idx]] > s[Rc[Idx]]? sid[Lc[Idx]]:sid[Rc[Idx]];
+	}   
 };
 
 
@@ -195,49 +227,73 @@ int RMQ( int L, int R, int *A ){
 	return A[ dp[L][k] ] < A[ dp[R-(1<<k)+1][k] ] ? dp[L][k]:dp[R-(1<<k)+1][k];
 }
 
-// 计算后缀数组 O(nlogn)
-int cntA[maxn],cntB[maxn],rnk[maxn],A[maxn],B[maxn],tsa[maxn]; // 基数排序辅助数组
-int ch[maxn],height[maxn],sa[maxn]; // ch:将字符数组转化后得到的字符数组， sa:排序后的后缀数组， height[i]: sa[i]与sa[i-1]所代表的后缀的最长公共前缀
-const int maxC = 1026;
-void getSuffixArray(int n){
-	// 一定注意初始化 ch
-    for (int i = 0; i < maxC; i ++) cntA[i] = 0; // 所有对cntA的操作为基数排序操作 
-    for (int i = 1; i <= n; i ++) cntA[ch[i]] ++;
-    for (int i = 1; i < maxC; i ++) cntA[i] += cntA[i - 1];
-    for (int i = n; i; i --) sa[cntA[ch[i]] --] = i; // sa是排序后的索引
-    rnk[sa[1]] = 1;
-    for (int i = 2; i <= n; i ++){
-        rnk[sa[i]] = rnk[sa[i - 1]];
-        if (ch[sa[i]] != ch[sa[i - 1]]) rnk[sa[i]] ++;
-    }// 此处rnk得到对单字母(长度为1的子串）的序， aabaaaab 得到 11211112
-    for (int l = 1; rnk[sa[n]] < n; l <<= 1){
-		// 将（已排序的）长度为L的子串构成长度为2*L的子串，用双关键字排序
-        for (int i = 0; i <= n; i ++) cntA[i] = 0;
-        for (int i = 0; i <= n; i ++) cntB[i] = 0;
-        for (int i = 1; i <= n; i ++)
-        {
-            cntA[A[i] = rnk[i]] ++;
-            cntB[B[i] = (i + l <= n) ? rnk[i + l] : 0] ++;
-        }
-        for (int i = 1; i <= n; i ++) cntB[i] += cntB[i - 1];
-        for (int i = n; i; i --) tsa[cntB[B[i]] --] = i; // tsa 是排序后（后半段L长的子串）的索引
-        for (int i = 1; i <= n; i ++) cntA[i] += cntA[i - 1];
-        for (int i = n; i; i --) sa[cntA[A[tsa[i]]] --] = tsa[i]; // 从tsa[n] 到tsa[i]，从第二关键字最大的开始
-        rnk[sa[1]] = 1;
-        for (int i = 2; i <= n; i ++){
-            rnk[sa[i]] = rnk[sa[i - 1]];
-            if (A[sa[i]] != A[sa[i - 1]] || B[sa[i]] != B[sa[i - 1]]) rnk[sa[i]] ++;
-        }
-    }// 此处得到后缀数组suffix array 及其 rank
-    for (int i = 1, j = 0; i <= n; i ++){
-		// 基于这样一个事实 suffix(k-1) 排在 suffix(i-1)(rank[i-1])的前一位，那么suffix(k)肯定在suffix(i)前,他们最大前缀是H[rank[i-1]]-1
-		// 故H[rank[i]] >= H[rank[i-1]-1];
-        if (j) j --; // 相当于初始化为 height[rnk[i-1]]
-        while (ch[i + j] == ch[sa[rnk[i] - 1] + j]) j ++;
-		// 当前计算Height of suffix(i), ch[i+j]是suffix(i)的第j+1个字符，尽管可能还没计算H[rank[i]-1]，但是我们已经知道他们最大前缀至少是j了,继续往后比较知道不相同字符为止
-        height[rnk[i]] = j;
-    }
-} 
+// 二维平面上的四叉树
+const int NODE_CAPACITY = 10;
+typedef int T;
+struct QuadtreeNode{
+	T left,right,up,down; // define the region
+	vector<T> x,y;
+	int childNode[4]; // 很容易拓展到多叉树啊
+	QuadtreeNode(int l,int r, int u, int d ):left(l),right(r),up(u),down(d){
+		for( int i(0); i < 4; i++ ) childNode[i] = -1;	
+	}
+	QuadtreeNode(){}
+}nodes[maxn];
+struct QuadTree{
+	int NEXT_FREE_IDX,x,y,l,r,u,d;
+	vector<int> X,Y;
+	QuadTree(int left, int right, int up, int down){ 
+		NEXT_FREE_IDX = 0; 
+		nodes[NEXT_FREE_IDX++] = QuadtreeNode(left,right,up,down);
+	}
+	void divideNode(int id){
+		QuadtreeNode &node = nodes[id];
+		int midx = node.left + (node.right-node.left)/2;
+		int midy = node.down + (node.up-node.down)/2;
+		node.childNode[0] = NEXT_FREE_IDX;
+		nodes[NEXT_FREE_IDX++] = QuadtreeNode(node.left,midx,node.up,midy);
+		node.childNode[1] = NEXT_FREE_IDX;
+		nodes[NEXT_FREE_IDX++] = QuadtreeNode(node.left,midx,midy,node.down);
+		node.childNode[2] = NEXT_FREE_IDX;
+		nodes[NEXT_FREE_IDX++] = QuadtreeNode(midx,node.right,node.up,midy);
+		node.childNode[3] = NEXT_FREE_IDX;
+		nodes[NEXT_FREE_IDX++] = QuadtreeNode(midx,node.right,midy,node.down);
+	}
+	void insert(int x, int y ){
+		this->x = x, this->y = y;
+		inst(0);
+	}
+	bool inst( int id){
+		QuadtreeNode &node = nodes[id];
+		if( x < node.left || x > node.right || y < node.down || y > node.up ) return false;
+		if( node.x.size() < NODE_CAPACITY ){ // this node is not full
+			node.x.push_back(x), node.y.push_back(y);
+		}
+		else{
+			if( node.childNode[0]==-1 )
+				divideNode(id);
+			for( int i(0); i < 4; i ++ )
+				if( inst(node.childNode[i] )) break;
+		}
+		return true;
+	}
+	void query(int l,int r, int u, int d ){
+		this->l = l, this->r = r, this->u = u, this->d = d;
+		X.clear(), Y.clear();
+		qry(0);
+	}
+	void qry( int id ){
+		QuadtreeNode &node = nodes[id];
+		if( node.left > r || node.right < l || node.up < d || node.down > u ) return;
+		for( int i(0); i < node.x.size(); i++ )
+			X.push_back( node.x[i] ), Y.push_back( node.y[i] );
+		if( node.childNode[0]==-1 ) return;
+		for( int i(0); i < 4; i++ )
+			qry( node.childNode[i] );
+	}
+};
+
+
 
 
 // 在二分查找的问题中，通常在闭区间内[l,r]内寻找目标位置，当区间长度为2时，出现l==mid的情况。
@@ -249,3 +305,11 @@ void getSuffixArray(int n){
 //单调队列维护的是当前仍可能作为最小值的数。
 //我们可以拓展为：一个数从队列弹出一次表示当前窗口下，右边有一个数比他小，同样的思路，将刚弹出的数插入一个新的单调队列，当其再弹出时，便不用对其再做考虑了。所以这两个队列同时维护仍可能作为次小值的数。
 //由于是单调的，对比队列1的第两个元素（如果存在）与队列2的队首元素（如果存在）便得到次小值。
+
+// 在结构体中重载运算符，如 <, 注意两个位置用关键字const修饰，其中第二个对于调用sort()函数时是必须，模板规定只能使用不改变对象成员的比较函数
+// bool operator < ( const T x ) const{}
+
+// 有时候需要维护一个数组a所有区间的某个属性（区间和或不重复元素的区间和）。前缀“和”数组B_1可以看成所有以第一个元素开始的区间的和组成的数组。
+// 那么这个数组B_1“所有数”减去a[1]（区间修改）便得到所有以第二个元素开始的区间的和，如此类推，用可持续化的线段树来维护B_2一直到B_n。
+// 对于 不重复元素的区间和, 区别在于不是所有的数减a[i]，而是一个更小的区间
+// 在离线查询中，这是一个很好的方案

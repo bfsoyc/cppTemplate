@@ -61,7 +61,7 @@ vector<LL> matrixPower( vector<LL>& p, LL d ){ //递归写法
 vector<int> primeList,Phi( R+1, 0 );	//Phi[i] 小于i并且与i互质的正整数的个数
 vector<bool> isPrime( R+1, true );
 void getPrimes( int R){  // O(n)复杂度获取小于等于R的素数（可计算欧拉函数Phi）
-	for( int i(2) ; i <= R ; i++ ){  // 枚举M 任意合数S = M*p p为S的最小质因数，M必然与p互质
+	for( int i(2) ; i <= R ; i++ ){  // 枚举i=M 任意合数S = M*p p为S的最小质因数，M的最小质因素必然>=p,下面有分类谈论。
 		if( isPrime[i] ){
 			primeList.push_back( i );
 			//Phi[i] = i-1;	// phi(i) = i-1 if i is prime
@@ -146,6 +146,64 @@ void getFactors( LL n, vector<int>& factors ){
 	factors.clear();
 	dfs(0, 1, pos, Pcnt, factors, sq);
 }
+
+long long mod_mul(long long a, long long b, long long n) {
+	// 模拟二进制乘法 计算 a*b % n 的值 
+    long long res = 0;
+    while (b) {
+        if(b & 1)
+            res = (res + a) % n;
+        a = (a + a) % n;
+        b >>= 1;
+    }
+    return res;
+}
+
+long long fastPowerMOD( long long a, long long u, long long MOD){
+	// calculate a^u % MOD; 
+	// tranform u to its binary form, consider its digit from lower bit to higher bit
+	long long ret = 1;
+	while( u ){
+		if( u&1 )// ret = ret*a % MOD; // ret*a 可能溢出64位整数
+			ret = mod_mul(ret, a, MOD );
+		//a = a*a % MOD;
+		a = mod_mul(a, a, MOD );
+		u = u >> 1;
+	}
+	return ret;
+}
+
+// 检查一个数是否质数。 n > 2  复杂度O( aList.size()*logn )
+vector<int> aList; // 如果n<2^64，只用选取a=2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37做测试
+bool MillerRabin(long long n){
+	if( n%2 == 0 ) return false; // n 为偶数
+	// 如果 a^2 = p ( mod n )，那么 a = 1 (mod n ) 或 a = -1 (mod n )
+	// 因为费马小定理： a^(n-1) = 1 (mod n ), 如果n-1是偶数，我们可以应用上式
+	// a^((n-1)/2) = 1 (mod n ) 或 a^((n-1)/2) = -1 (mod n )
+	// 如果 (n-1)/2 仍然为偶数 并且 a^((n-1)/2) = 1 (mod n ) 成立，那么还可以继续分解
+	// 这样我们得到一系列应该成立的等式，若某一阶段不成立了，则n不是素数
+	// 我们先找到的最小的a^u，再逐步扩大到a^(n-1)
+	long long u = n-1; // u 为指数
+	while( u%2==0 ) u>>=1;
+
+	for( int i(0); i < aList.size(); i++ ){
+		int a = aList[i]; if( a>=n ) continue;
+		long long x = fastPowerMOD(a, u, n );
+		while( u < n-1 ){ // 只需进行r-1次， 2^r*d = n-1 (d是奇数）
+			//long long y = x*x % n;
+			long long y = mod_mul( x, x, n );
+			if( y==1 && x!=1 && x!=n-1 ){
+				// y = x^2 = 1( mod n ), 但是 x != (1 or -1 )(mod n )违反二次检测定理 
+				return false;
+			}
+			x = y, u <<= 1;
+		}
+		if( x != 1 ) // fermat 小定理
+			return false;
+	}
+	return true;
+}
+
 
 //
 LL gcd( LL a, LL b ){

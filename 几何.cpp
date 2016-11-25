@@ -15,7 +15,7 @@
 #include<string>
 using namespace std;
 typedef long long LL;
-const int maxn = 105;
+
 
 const double eps = 1e-8;
  
@@ -85,4 +85,31 @@ double TriagnleCircleIntersectionArea( Circle& C, Point& A, Point& B, bool inner
 		double theta = includedAngle( A-C.c, B-C.c );
 		return dcmp(Cross(A-C.c, B-C.c ))*0.5*theta*C.r*C.r;
 	}
+}
+
+// 计算向量极角
+double angle( Vector v ){ return atan2(v.y,v.x); }
+// 两圆相交
+int getCircleCircleIntersection( Circle C1, Circle C2, vector<Point>& sol, vector<double>& agl ){
+	double d = Length( C1.c-C2.c );
+	if( dcmp(d) == 0 ){
+		if( dcmp(C1.r - C2.r )==0 ) return -1; // 两圆重合
+		return 0; // 圆心重合半径不同
+	}
+	if( dcmp( C1.r+C2.r-d ) < 0 ) return 0; // 外离
+	if( dcmp( fabs(C1.r-C2.r)-d) > 0 ) return 0; // 相切
+
+	double a = angle( C2.c-C1.c );	// 向量C1C2的极角
+	double da = acos( (C1.r*C1.r+d*d-C2.r*C2.r)/(2*C1.r*d) );
+	// C1C2 到C1P1的角
+	Point p1 = C1.point(a-da), p2 = C1.point(a+da);
+
+	agl.clear();
+	//sol.push_back(p1);
+	agl.push_back(a-da);
+	if( dcmp(p1.x-p2.x)==0 && dcmp(p1.y-p2.y)==0 ) return 1;
+	//sol.push_back( p2);
+	agl.push_back(a+da);
+	// C1上从p1到p2的一段弧在C2内
+	return 2;
 }
