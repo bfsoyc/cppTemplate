@@ -1,5 +1,5 @@
 // 字典树
-int ch[maxnode][sigma_size];  //maxnode为字典树最大结点容量（一般为sigma_size*字符串长度），sigma_size为字符集大小（每个结点最多子结点数） 
+int ch[maxnode][sigma_size];  //maxnode为字典树最大结点容量（字符串长度的总和），sigma_size为字符集大小（每个结点最多子结点数） 
 int val[maxnode];//每个结点信息 
 struct Trie 
 { 
@@ -293,7 +293,29 @@ struct QuadTree{
 	}
 };
 
+// 树状数组(二叉索引树)
+#define lowbit(x) (x&-x)
+LL C[maxn],sz; // 辅助数组C初始化为0，n次add操作将需要维护的数组录入。 由于C存放的是前缀和，注意溢出
+LL sum( int x ){ // 查询 A[1]...A[x]的和
+	LL ret = 0;
+	while( x > 0 ){
+		ret += C[x]; 
+		x-= lowbit(x);
+	}
+	return ret;
+}
+void add( int x, int d ){
+	while( x <= sz ){
+		C[x] += d;
+		x += lowbit(x);
+	}
+}
 
+// 两种特殊的问题下： 区间查询，点修改 或 点查询，区间修改
+// 使用树状数组更便捷。对于点查询，区间修改问题:
+// 构造差分数组 D[i] = A[i]-A[i-1]; => A[i] = (A[1]+...+A[i]) - (A[1]+...+A[i-1]) = D[1]+...+D[i]
+// 而区间[l,r]修改(增量det)操作一般对应两次add操作: D[l]+det, D[r+1]-det;
+// 其中 D[1] = A[1]; 
 
 
 // 在二分查找的问题中，通常在闭区间内[l,r]内寻找目标位置，当区间长度为2时，出现l==mid的情况。

@@ -10,7 +10,8 @@ struct Edge{
 int done[maxn*maxn],dist[maxn*maxn];
 vector<Edge> G[maxn*maxn];
 void Dijkstra(int st){
-	// 该函数调用前需对done和dist进行初始化
+	memset(done,0,sizeof(done));
+	memset(dist,-1,sizeof(dist));
 	priority_queue<pii,vector<pii>,greater<pii> >q;//不用greater时省略，默认为大根堆 q.push(make_pair(dist[a],a));/起始点加入队列 
 	q.push( pii(0,st) );
 	dist[st] = 0;
@@ -33,6 +34,27 @@ void Dijkstra(int st){
 			} 
 		} 
 	} 
+}
+
+//最小生成树 prim 算法，连通图上的所有 N 个点，并且使得连接的线段的总长最短，
+// 复杂度 O(mlogm)， m是边数
+int inTree[maxn]; //		标记结点是否在生成树内
+int prim(int n){	
+	int d(0);
+	memset( inTree,0,sizeof(inTree));
+	int s = 0; inTree[s] = 1; // 随便将一个结点i放入生成树,这里是第一个结点
+	priority_queue<pii,vector<pii>,greater<pii> > q;
+	for( int h = head[s]; h!=-1; h=edges[h].next ) // 更新各结点到生成树的距离
+		q.push( pii( edges[h].w, edges[h].v ) );
+	
+	for( int i(1); i < n ; i++ ){ // 每次找得1段，做 n-1次循环 
+		while( inTree[q.top().second] ) q.pop(); // 若存在0权边，可能runtime error吗?
+		int p = q.top().second;
+		inTree[p] = 1; d += q.top().first; q.pop();
+		for( int h = head[p]; h!=-1; h=edges[h].next ) // 更新各结点到生成树的距离
+			q.push( pii(edges[h].w, edges[h].v) );
+	}
+	return d;
 }
 
 // 最大流算法 限时吃紧的情况下请尽量压缩n的大小，测试样例未必极端
@@ -313,10 +335,103 @@ struct Tarjan{
 	}
 };
 
-
 // 并查集 
 //带路径压缩的找根结点函数 
 int find(int x){return root[x]==x?x:root[x]=find(root[x]);} 
+
+// 2-sat(2-satisfiability)
+// 该类问题抽象为：有一系列布尔型变量X={x1,x2,...,xi},其中某些变量对存在约束关系如xi!=xj为真，问是否存在满足约束的合法解。
+struct TwoSAT{ 
+	int n; 
+	vector<int> G[maxn*2]; 
+	bool mark[maxn*2]; 
+	int S[maxn*2],c; //记录一条dfs进行的路径，用于回溯
+ 
+	bool dfs( int x ){ 
+	if( mark[x^1] ) return false;//  根据构建的边推导，出现矛盾则返回false 
+	if( mark[x] ) return true;  //  算是剪枝 
+		mark[x] = true; 
+		S[c++] = x; 
+		for( int i = 0 ;   i < G[x].size(); i++ )if( !dfs( G[x][i] ) ) return false; 
+   
+		return true;  
+	} 
+ 
+	void init( int n ){ // 0-based
+		this->n = n; 
+		for( int i = 0 ; i < n*2 ; i++ ) G[i].clear(); 
+		memset( mark,0,sizeof( mark ) );//   
+	} 
+ 
+	//  增加条件 ( x==xval or y==yval) == true 
+	//  xval,yval 为 0（定义为真）或 1 
+	//  若果x不等于y (x = !y),  则相当于增加两个条件( x==0 or y==0)==true 和 ( x==1 or y==1 )==true 
+	void add_clause( int x, int xval, int y, int yval ){ 
+		x = x*2 + xval; // 每个结点x拆分为两个结点 x*2 与 x*2+1
+		y = y*2 + yval; 
+		G[x^1].push_back( y ); 
+		G[y^1].push_back( x ); 
+	} 
+ 
+	bool solve(){ 
+		for( int i = 0 ; i < n*2 ; i+= 2 )if( !mark[i] && !mark[i+1] ){ 
+			c = 0; 
+			if( !dfs(i) ){ 
+				while( c > 0 ) mark[S[--c]] = false; 
+				if( !dfs(i+1) ) return false; 
+			} 
+		} 
+		return true; 
+	} 
+}; 
+
+// 二分图判断并且标记 color[i] == 1 或 2分别表示两个子图
+int color[maxn];
+bool solve( int n){
+	for( int i(1); i <= n ; i++ )if( !color[i] ){
+		color[i] = 1;
+		queue<int> q; q.push(i);
+		while( !q.empty() ){
+			int u = q.front(); q.pop();
+			for( int h = head[u]; h!=-1 ; h=edges[h].next ){
+				int v = edges[h].v;
+				if( color[u]==color[v] ) return false;
+				if( color[v]==0 ){
+					color[v] = color[u]==1?2:1;
+					q.push( v );
+				}
+			}
+		}
+	}
+	return true;
+}
+
+
+// 二分图的最大匹配 匈牙利算法 
+vector<int> G[maxn];
+int used[maxn],mat[maxn]; // mat[i] 表示左子图中与右子图结点i匹配的结点编号
+bool hungery(int u){ // mat初始化1次， used在每次调用hungery前（不包括递归调用）初始化
+	for(int i=0;i < G[u].size();i++){ 
+		int v = G[u][i]; // 链表
+		//c 是其中一个与 u(a)相连的右子图里的点（即他们右子图的 v 与左子图的 u 存在边） 
+		if(!used[v]){//对于每个 a 而言，判断 v 是否访问过，属于dfs剪枝
+			used[v] = 1;			
+		//2 种情况任一成立则总匹配数加一，就是 main函数里的 sum++
+			if(mat[v]==-1||hungery(mat[v])){ //这两个条件不能交换位置
+				//1. v 未被匹配， 直接将u与v匹配
+				//2. 左子图中的mat[v]找到右子图中v以外的匹配点k,即有更新mat[k]=mat[v], mat[v] = u
+				mat[v]=u; 
+				return true; 
+			}  
+		} 
+	} 
+	return false; 
+} 
+
+// 二分图的匹配问题
+// 1. 最小点覆盖的点数(用最少的点覆盖所有的边) = 二分图最大匹配（匹配对的数目）
+//		直观的理解是，最大匹配下，任何边都被覆盖了，而且去掉任何一个匹配都导致未被覆盖的边
+// 2. 最大独立集的点数(选出一个最大子集，使得子集内的点都无边） = 总点数 - 二分图最大匹配
 
 /* 树上的问题
 	最长路径： 点集的直径用其两个端点维护，方便两个点集的合并。

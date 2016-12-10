@@ -85,7 +85,7 @@ int KMP( char* T, char* P, int* f ){
 	return cnt;
 }
 
-// Aho-Corasick automaton
+// Aho-Corasick automation
 // AC自动机：多模板串匹配
 int f[maxn], last[maxn];
 struct AhoCorasickAutomata{
@@ -137,6 +137,49 @@ struct AhoCorasickAutomata{
 	}
 };
 
+// 计算长度为n的所有子串组合，按字典序输出。 复杂度O(n!)
+// 例如 1234 的一个子串组合是： 3-124  其中字典序最小的一个是1-2-3-4,最大的一个是4-3-2-1.
+int mark[10];
+vector<string> buff;
+void comb( int n){
+	vector<int> unMark;
+	for( int i(0); i < n; i++ )if( !mark[i] ) unMark.push_back(i);
+	if( unMark.empty() ){
+		for( int i(0); i < buff.size(); i++ ){
+			if(i) printf("-");
+			printf("%s",buff[i].c_str());
+		}
+		printf("\n");
+		return;
+	}
+	// 枚举 unMark（长度为m) 的所有子串共2^m-1个,为了简便使用二进制的掩码方式实现，最后排序。
+	vector<string> subStrs;
+	int maxS = 1<<unMark.size();
+	for( int s(1); s < maxS ; s++ ){ // empty string is not in consideration
+		string str="";
+		int bit = maxS>>1, j = 0;
+		while( bit ){
+			if( bit & s ) str.push_back(char('1'+unMark[j]));
+			bit=bit>>1;	j++;
+		}
+		subStrs.push_back( str );
+	}
+	sort( subStrs.begin(), subStrs.end() ); // 按字典序排
+
+	for( int i(0); i < subStrs.size(); i++ ){
+		int sz = subStrs[i].size();
+		for( int j(0); j < sz; j++ ){
+			mark[ subStrs[i][j]-'1' ] = 1;
+		}
+		buff.push_back(subStrs[i]);
+		comb(n);
+		for( int j(0); j < sz; j++ ){
+			mark[ subStrs[i][j]-'1' ] = 0;
+		}
+		buff.pop_back();
+	}
+}
+
 
 // 在关于字符串的子串问题中，经常用到后缀数组，通常可以转化到height与sa数组上的搜索问题，二分或者维护单调队列
 // 值得特别小心的有两点：1上述模板的代码实现中height与sa是以下标1开始的，用其他数据结构存储时注意边界
@@ -149,3 +192,8 @@ struct AhoCorasickAutomata{
 // %[aB'] 匹配a、B、'中一员，贪婪性
 // %[^a] 匹配非a的任意字符，并且停止读入，贪婪性
 // %4c 匹配4字节长度的字符（%[width]type）
+
+// gets(char* s)当读取到文档结尾时返回NULL
+
+// algorithm中 lower_bound使用:
+// int pos = upper_bound(a,a+n,k)-a;
