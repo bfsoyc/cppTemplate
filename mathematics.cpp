@@ -29,14 +29,14 @@ LL fermat( LL a, LL d ){
 	return ans;
 }
 
-LL invPivot( LL a){		//a¿ÉÒÔÎª¸ºÊı
+LL invPivot( LL a){		//aå¯ä»¥ä¸ºè´Ÿæ•°
 	int m = e;
-	//·µ»Ø a Ä£mµÄÄæÔª£¬mÊÇËØÊı£¬Ö±½ÓÓÃ·ÑÂíĞ¡¶¨ÀíÇó½â£º a^(m-2) % m
+	//è¿”å› a æ¨¡mçš„é€†å…ƒï¼Œmæ˜¯ç´ æ•°ï¼Œç›´æ¥ç”¨è´¹é©¬å°å®šç†æ±‚è§£ï¼š a^(m-2) % m
 	//return fastExponentation(a, m-2);
 	return fermat( a, m-2 );
 }
 
-vector<LL> matrixCross( vector<LL> a, vector<LL> b){ // 2X2¾ØÕó³Ë·¨
+vector<LL> matrixCross( vector<LL> a, vector<LL> b){ // 2X2çŸ©é˜µä¹˜æ³•
 	LL M[] = {
 		a[0]*b[0]+a[1]*b[2], a[0]*b[1]+a[1]*b[3],
 		a[2]*b[0]+a[3]*b[2], a[2]*b[1]+a[3]*b[3]
@@ -45,7 +45,7 @@ vector<LL> matrixCross( vector<LL> a, vector<LL> b){ // 2X2¾ØÕó³Ë·¨
 	return vector<LL>(M, M+4);
 }
 
-vector<LL> matrixPower( vector<LL>& p, LL d ){ //µİ¹éĞ´·¨
+vector<LL> matrixPower( vector<LL>& p, LL d ){ //é€’å½’å†™æ³•
 	if( d == 1 ){
 		return p;
 	}
@@ -58,10 +58,10 @@ vector<LL> matrixPower( vector<LL>& p, LL d ){ //µİ¹éĞ´·¨
 	}
 }
 
-vector<int> primeList,Phi( R+1, 0 );	//Phi[i] Ğ¡ÓÚi²¢ÇÒÓëi»¥ÖÊµÄÕıÕûÊıµÄ¸öÊı
+vector<int> primeList,Phi( R+1, 0 );	//Phi[i] å°äºiå¹¶ä¸”ä¸iäº’è´¨çš„æ­£æ•´æ•°çš„ä¸ªæ•°
 vector<bool> isPrime( R+1, true );
-void getPrimes( int R){  // O(n)¸´ÔÓ¶È»ñÈ¡Ğ¡ÓÚµÈÓÚRµÄËØÊı£¨¿É¼ÆËãÅ·À­º¯ÊıPhi£©
-	for( int i(2) ; i <= R ; i++ ){  // Ã¶¾Ùi=M ÈÎÒâºÏÊıS = M*p pÎªSµÄ×îĞ¡ÖÊÒòÊı£¬MµÄ×îĞ¡ÖÊÒòËØ±ØÈ»>=p,ÏÂÃæÓĞ·ÖÀàÌ¸ÂÛ¡£
+void getPrimes( int R){  // O(n)å¤æ‚åº¦è·å–å°äºç­‰äºRçš„ç´ æ•°ï¼ˆå¯è®¡ç®—æ¬§æ‹‰å‡½æ•°Phiï¼‰
+	for( int i(2) ; i <= R ; i++ ){  // æšä¸¾i=M ä»»æ„åˆæ•°S = M*p pä¸ºSçš„æœ€å°è´¨å› æ•°ï¼ŒMçš„æœ€å°è´¨å› ç´ å¿…ç„¶>=p,ä¸‹é¢æœ‰åˆ†ç±»è°ˆè®ºã€‚
 		if( isPrime[i] ){
 			primeList.push_back( i );
 			//Phi[i] = i-1;	// phi(i) = i-1 if i is prime
@@ -80,8 +80,8 @@ void getPrimes( int R){  // O(n)¸´ÔÓ¶È»ñÈ¡Ğ¡ÓÚµÈÓÚRµÄËØÊı£¨¿É¼ÆËãÅ·À­º¯ÊıPhi£©
 	}
 }
 
-vector<int> primeDecomposition( LL n ){ // ¶ÔÕûÊın×÷ËØÊıÎ¨Ò»ĞÔ·Ö½â
-	// primeList ÊÇËØÊı±í
+vector<int> primeDecomposition( LL n ){ // å¯¹æ•´æ•°nä½œç´ æ•°å”¯ä¸€æ€§åˆ†è§£
+	// primeList æ˜¯ç´ æ•°è¡¨
 	int i(0);
 	vector<int> ret;
 	while( primeList[i] <= n ){
@@ -94,7 +94,7 @@ vector<int> primeDecomposition( LL n ){ // ¶ÔÕûÊın×÷ËØÊıÎ¨Ò»ĞÔ·Ö½â
 	}
 	return ret;
 }
-LL getDividors(LL num){  // »ñµÃÊı num µÄÔ¼ÊıµÄ¸öÊıO(sqrt(num)) µÄ¸´ÔÓ¶È
+LL getDividors(LL num){  // è·å¾—æ•° num çš„çº¦æ•°çš„ä¸ªæ•°O(sqrt(num)) çš„å¤æ‚åº¦
     LL count = 0;  
     for(LL i=1;i*i<=num;i++){  
         if(num%i==0){  
@@ -108,7 +108,7 @@ LL getDividors(LL num){  // »ñµÃÊı num µÄÔ¼ÊıµÄ¸öÊıO(sqrt(num)) µÄ¸´ÔÓ¶È
     return count;  
 }  
 
-// Òò×ÓÃ¶¾Ù
+// å› å­æšä¸¾
 void dfs(int idx, int sum, vector<int> &pos, vector<int> &Pcnt, vector<int>& factors, LL& sq){
 	if( sum > sq ) return;
 	if( idx==pos.size() ){
@@ -122,9 +122,9 @@ void dfs(int idx, int sum, vector<int> &pos, vector<int> &Pcnt, vector<int>& fac
 	}
 }
 void getFactors( LL n, vector<int>& factors ){
-	// ÎÒÃÇÖ»ĞèÒªÃ¶¾ÙĞ¡ÓÚsqrt(n)µÄÒò×Ó¼´¿É£¬ÈôxÊÇnµÄĞ¡ÓÚsqrt(n)µÄÒ»¸öÒò×Ó£¬×ÔÈ»µØn/xÊÇxµÄÒ»¸ö´óÓÚsqrt(n)µÄÒò×Ó
-	// Í¨¹ınµÄËØÒò×ÓµÄ×éºÏµÃµ½nµÄÒò×Ó£¬¶ÔÓÚ´óÓÚsqrt(n)µÄËØÒò×ÓÊÇ²»Ğè¿¼ÂÇµÄ¡£
-	// primeList ÊÇËØÊı±í
+	// æˆ‘ä»¬åªéœ€è¦æšä¸¾å°äºsqrt(n)çš„å› å­å³å¯ï¼Œè‹¥xæ˜¯nçš„å°äºsqrt(n)çš„ä¸€ä¸ªå› å­ï¼Œè‡ªç„¶åœ°n/xæ˜¯xçš„ä¸€ä¸ªå¤§äºsqrt(n)çš„å› å­
+	// é€šè¿‡nçš„ç´ å› å­çš„ç»„åˆå¾—åˆ°nçš„å› å­ï¼Œå¯¹äºå¤§äºsqrt(n)çš„ç´ å› å­æ˜¯ä¸éœ€è€ƒè™‘çš„ã€‚
+	// primeList æ˜¯ç´ æ•°è¡¨
 	LL sq = sqrt(n)+1; // LL for reason
 	if( sq*sq > n ) sq--;
 	vector<int> pos, Pcnt;
@@ -141,14 +141,14 @@ void getFactors( LL n, vector<int>& factors ){
 		}
 		i++;
 	}
-	// nµÄËØÒò×Ó¸öÊı£¨°üÀ¨ÖØ¸´µÄ£©²»»áºÜ¶à£¬ 2^20ÒÑ¾­´ïµ½10^6¼¶±ğÁË¡£
-	// ËùÒÔnµÄÒò×Ó¸öÊı²»»áºÜ¶à£¬¼ÙÉènÓĞ7¸öÒò×Ó2,7¸öÒò×Ó3,7¸öÒò×Ó5,Ò²Ö»ÓĞ8^3ÖÖ²»Í¬µÄ×éºÏ
+	// nçš„ç´ å› å­ä¸ªæ•°ï¼ˆåŒ…æ‹¬é‡å¤çš„ï¼‰ä¸ä¼šå¾ˆå¤šï¼Œ 2^20å·²ç»è¾¾åˆ°10^6çº§åˆ«äº†ã€‚
+	// æ‰€ä»¥nçš„å› å­ä¸ªæ•°ä¸ä¼šå¾ˆå¤šï¼Œå‡è®¾næœ‰7ä¸ªå› å­2,7ä¸ªå› å­3,7ä¸ªå› å­5,ä¹Ÿåªæœ‰8^3ç§ä¸åŒçš„ç»„åˆ
 	factors.clear();
 	dfs(0, 1, pos, Pcnt, factors, sq);
 }
 
 long long mod_mul(long long a, long long b, long long n) {
-	// Ä£Äâ¶ş½øÖÆ³Ë·¨ ¼ÆËã a*b % n µÄÖµ 
+	// æ¨¡æ‹ŸäºŒè¿›åˆ¶ä¹˜æ³• è®¡ç®— a*b % n çš„å€¼ 
     long long res = 0;
     while (b) {
         if(b & 1)
@@ -164,7 +164,7 @@ long long fastPowerMOD( long long a, long long u, long long MOD){
 	// tranform u to its binary form, consider its digit from lower bit to higher bit
 	long long ret = 1;
 	while( u ){
-		if( u&1 )// ret = ret*a % MOD; // ret*a ¿ÉÄÜÒç³ö64Î»ÕûÊı
+		if( u&1 )// ret = ret*a % MOD; // ret*a å¯èƒ½æº¢å‡º64ä½æ•´æ•°
 			ret = mod_mul(ret, a, MOD );
 		//a = a*a % MOD;
 		a = mod_mul(a, a, MOD );
@@ -173,32 +173,32 @@ long long fastPowerMOD( long long a, long long u, long long MOD){
 	return ret;
 }
 
-// ¼ì²éÒ»¸öÊıÊÇ·ñÖÊÊı¡£ n > 2  ¸´ÔÓ¶ÈO( aList.size()*logn )
-vector<int> aList; // Èç¹ûn<2^64£¬Ö»ÓÃÑ¡È¡a=2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37×ö²âÊÔ
+// æ£€æŸ¥ä¸€ä¸ªæ•°æ˜¯å¦è´¨æ•°ã€‚ n > 2  å¤æ‚åº¦O( aList.size()*logn )
+vector<int> aList; // å¦‚æœn<2^64ï¼Œåªç”¨é€‰å–a=2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37åšæµ‹è¯•
 bool MillerRabin(long long n){
-	if( n%2 == 0 ) return false; // n ÎªÅ¼Êı
-	// Èç¹û a^2 = p ( mod n )£¬ÄÇÃ´ a = 1 (mod n ) »ò a = -1 (mod n )
-	// ÒòÎª·ÑÂíĞ¡¶¨Àí£º a^(n-1) = 1 (mod n ), Èç¹ûn-1ÊÇÅ¼Êı£¬ÎÒÃÇ¿ÉÒÔÓ¦ÓÃÉÏÊ½
-	// a^((n-1)/2) = 1 (mod n ) »ò a^((n-1)/2) = -1 (mod n )
-	// Èç¹û (n-1)/2 ÈÔÈ»ÎªÅ¼Êı ²¢ÇÒ a^((n-1)/2) = 1 (mod n ) ³ÉÁ¢£¬ÄÇÃ´»¹¿ÉÒÔ¼ÌĞø·Ö½â
-	// ÕâÑùÎÒÃÇµÃµ½Ò»ÏµÁĞÓ¦¸Ã³ÉÁ¢µÄµÈÊ½£¬ÈôÄ³Ò»½×¶Î²»³ÉÁ¢ÁË£¬Ôòn²»ÊÇËØÊı
-	// ÎÒÃÇÏÈÕÒµ½µÄ×îĞ¡µÄa^u£¬ÔÙÖğ²½À©´óµ½a^(n-1)
-	long long u = n-1; // u ÎªÖ¸Êı
+	if( n%2 == 0 ) return false; // n ä¸ºå¶æ•°
+	// å¦‚æœ a^2 = p ( mod n )ï¼Œé‚£ä¹ˆ a = 1 (mod n ) æˆ– a = -1 (mod n )
+	// å› ä¸ºè´¹é©¬å°å®šç†ï¼š a^(n-1) = 1 (mod n ), å¦‚æœn-1æ˜¯å¶æ•°ï¼Œæˆ‘ä»¬å¯ä»¥åº”ç”¨ä¸Šå¼
+	// a^((n-1)/2) = 1 (mod n ) æˆ– a^((n-1)/2) = -1 (mod n )
+	// å¦‚æœ (n-1)/2 ä»ç„¶ä¸ºå¶æ•° å¹¶ä¸” a^((n-1)/2) = 1 (mod n ) æˆç«‹ï¼Œé‚£ä¹ˆè¿˜å¯ä»¥ç»§ç»­åˆ†è§£
+	// è¿™æ ·æˆ‘ä»¬å¾—åˆ°ä¸€ç³»åˆ—åº”è¯¥æˆç«‹çš„ç­‰å¼ï¼Œè‹¥æŸä¸€é˜¶æ®µä¸æˆç«‹äº†ï¼Œåˆ™nä¸æ˜¯ç´ æ•°
+	// æˆ‘ä»¬å…ˆæ‰¾åˆ°çš„æœ€å°çš„a^uï¼Œå†é€æ­¥æ‰©å¤§åˆ°a^(n-1)
+	long long u = n-1; // u ä¸ºæŒ‡æ•°
 	while( u%2==0 ) u>>=1;
 
 	for( int i(0); i < aList.size(); i++ ){
 		int a = aList[i]; if( a>=n ) continue;
 		long long x = fastPowerMOD(a, u, n );
-		while( u < n-1 ){ // Ö»Ğè½øĞĞr-1´Î£¬ 2^r*d = n-1 (dÊÇÆæÊı£©
+		while( u < n-1 ){ // åªéœ€è¿›è¡Œr-1æ¬¡ï¼Œ 2^r*d = n-1 (dæ˜¯å¥‡æ•°ï¼‰
 			//long long y = x*x % n;
 			long long y = mod_mul( x, x, n );
 			if( y==1 && x!=1 && x!=n-1 ){
-				// y = x^2 = 1( mod n ), µ«ÊÇ x != (1 or -1 )(mod n )Î¥·´¶ş´Î¼ì²â¶¨Àí 
+				// y = x^2 = 1( mod n ), ä½†æ˜¯ x != (1 or -1 )(mod n )è¿åäºŒæ¬¡æ£€æµ‹å®šç† 
 				return false;
 			}
 			x = y, u <<= 1;
 		}
-		if( x != 1 ) // fermat Ğ¡¶¨Àí
+		if( x != 1 ) // fermat å°å®šç†
 			return false;
 	}
 	return true;
@@ -210,7 +210,7 @@ LL gcd( LL a, LL b ){
 	return a%b==0 ? b: gcd(b,a%b);
 }
 
-void num2bin( int num , int bit, char* s){ // 10½øÖÆÊınum×ª»¯ÎªbitÎ»¶ş½øÖÆ±íÊ¾µÄ×Ö·û´®
+void num2bin( int num , int bit, char* s){ // 10è¿›åˆ¶æ•°numè½¬åŒ–ä¸ºbitä½äºŒè¿›åˆ¶è¡¨ç¤ºçš„å­—ç¬¦ä¸²
 	s[bit] = '\0';
 	int i = bit-1;
 	while( i >= 0 ){
@@ -220,7 +220,7 @@ void num2bin( int num , int bit, char* s){ // 10½øÖÆÊınum×ª»¯ÎªbitÎ»¶ş½øÖÆ±íÊ¾µÄ
 	}
 }
 
-//¸´Êı½á¹¹Ìå
+//å¤æ•°ç»“æ„ä½“
 struct complex
 {
     double r,i;
@@ -251,25 +251,25 @@ vector<complex> DFT( vector<complex> x , int type = 1){
 		evenX.push_back( x[i+1] );
 	}
 	vector<complex> F1 = DFT( oddX, type ), F2 = DFT( evenX, type ), X(N);
-	complex w(1,0); // ÎªÊ²Ã´ÔÚÃ»ÓĞÖØÔØ=²Ù×÷·ûµÄÇé¿öÏÂ£¬ w = 1 ÄÜ´ïµ½Í¬ÑùĞ§¹û
+	complex w(1,0); // ä¸ºä»€ä¹ˆåœ¨æ²¡æœ‰é‡è½½=æ“ä½œç¬¦çš„æƒ…å†µä¸‹ï¼Œ w = 1 èƒ½è¾¾åˆ°åŒæ ·æ•ˆæœ
 	for( int k = 0 ; k < N ; k++ ){
 		X[k] = F1[ k%hN ] + w*F2[ k%hN ];
 		if( type==-1 ){ 
-			// Ó¦¸ÃÊÇ´íµÄ  IDFT(k) ²»Ó¦¸ÃµÈÓÚ IDFT( oddX ) + W(k,N)*IDFT(evenX)
+			// åº”è¯¥æ˜¯é”™çš„  IDFT(k) ä¸åº”è¯¥ç­‰äº IDFT( oddX ) + W(k,N)*IDFT(evenX)
 			X[k].r /= N, X[k].i /= N; // ?
 		}
 		w = w*WN;
 	}
 	return X;
 }
-// ÎÒÃÇÏ£Íû°ÑÆæÊıÏÂ±êµÄÊı·Åµ½Ç°°ë¶Î£¬Å¼ÊıÏÂ±êµÄ·Åµ½ºó°ë¶Î£¬ÔÙ¶ÔÕâÁ½¸ö°ë¶Îµİ¹é´¦Àí
-// È»¶øÕâÑù´¦ÀíÎŞÒÉ»á¶à²Ù×÷ºÜ¶à´Î£¬ÏÂÃæ²Î¿¼ÍøÉÏµÄÄ£°å£¬Î´²ÎÍ¸
+// æˆ‘ä»¬å¸Œæœ›æŠŠå¥‡æ•°ä¸‹æ ‡çš„æ•°æ”¾åˆ°å‰åŠæ®µï¼Œå¶æ•°ä¸‹æ ‡çš„æ”¾åˆ°ååŠæ®µï¼Œå†å¯¹è¿™ä¸¤ä¸ªåŠæ®µé€’å½’å¤„ç†
+// ç„¶è€Œè¿™æ ·å¤„ç†æ— ç–‘ä¼šå¤šæ“ä½œå¾ˆå¤šæ¬¡ï¼Œä¸‹é¢å‚è€ƒç½‘ä¸Šçš„æ¨¡æ¿ï¼Œæœªå‚é€
 void change(complex *y,int len)
 {
     int i,j,k;
     for(i = 1, j = len/2;i < len-1; i++){
-        if(i < j)swap(y[i],y[j]); //½»»»»¥ÎªĞ¡±ê·´×ªµÄÔªËØ£¬i<j±£Ö¤½»»»Ò»´Î 
-		//i×öÕı³£µÄ+1£¬j×ó·´×ªÀàĞÍµÄ+1,Ê¼ÖÕ±£³ÖiºÍjÊÇ·´×ªµÄ
+        if(i < j)swap(y[i],y[j]); //äº¤æ¢äº’ä¸ºå°æ ‡åè½¬çš„å…ƒç´ ï¼Œi<jä¿è¯äº¤æ¢ä¸€æ¬¡ 
+		//iåšæ­£å¸¸çš„+1ï¼Œjå·¦åè½¬ç±»å‹çš„+1,å§‹ç»ˆä¿æŒiå’Œjæ˜¯åè½¬çš„
         k = len/2;
         while( j >= k){
             j -= k;
@@ -278,13 +278,13 @@ void change(complex *y,int len)
         if(j < k) j += k;
     }
 }
-// ÖµµÃ×¢ÒâµÄÊÇ£¬Èç¹û¾í»ı½á¹û³öÏÖºÜ´óµÄÊı£¬¿ÉÄÜÓĞ½Ï´óµÄ¾«¶ÈÎó²î£¬µ«ÊÇÏà¶ÔÖµµÄ´óĞ¡µÄ²»±äµÄ
-// ¸µÀïÒ¶±ä»»¶Ô x[n](*)y[n] <-> X(k)*Y(k)   (*)±íÊ¾Ô²ÖÜ¾í»ı£º×¢Òâ¶ÔyĞòÁĞÓĞÒ»¸ö·´×ª²Ù×÷¡£
+// å€¼å¾—æ³¨æ„çš„æ˜¯ï¼Œå¦‚æœå·ç§¯ç»“æœå‡ºç°å¾ˆå¤§çš„æ•°ï¼Œå¯èƒ½æœ‰è¾ƒå¤§çš„ç²¾åº¦è¯¯å·®ï¼Œä½†æ˜¯ç›¸å¯¹å€¼çš„å¤§å°çš„ä¸å˜çš„
+// å‚…é‡Œå¶å˜æ¢å¯¹ x[n](*)y[n] <-> X(k)*Y(k)   (*)è¡¨ç¤ºåœ†å‘¨å·ç§¯ï¼šæ³¨æ„å¯¹yåºåˆ—æœ‰ä¸€ä¸ªåè½¬æ“ä½œã€‚
 void DFT( complex *x, int L, int type = 1 ){
 	change( x, L );
-	for( int N = 2; N <= L ; N = N << 1 ){ // ´Ó½Ï¶ÌµÄ³¤¶ÈµİÍÆ½Ï³¤µÄ³¤¶È
+	for( int N = 2; N <= L ; N = N << 1 ){ // ä»è¾ƒçŸ­çš„é•¿åº¦é€’æ¨è¾ƒé•¿çš„é•¿åº¦
 		complex wn( cos(-type*2*PI/N), sin(-type*2*PI/N) );
-		for( int i = 0 ; i < L; i += N ){ // ¼ÆËã³¤¶ÈÎªNµÄ¸÷¸öblock
+		for( int i = 0 ; i < L; i += N ){ // è®¡ç®—é•¿åº¦ä¸ºNçš„å„ä¸ªblock
 			complex w(1,0);
 			for( int j = i; j < i+N/2; j++ ){
 				complex u = x[j], t = x[j+N/2];
@@ -296,8 +296,8 @@ void DFT( complex *x, int L, int type = 1 ){
 	}
 	if( type==-1 )
 		for( int i(0);  i < L; i++ ) 
-			// ÎªÊ²Ã´×îºó²Å³ı? ¿´ÉÏµİ¹é²¿·Ö´úÂë 
-			// ¶øÇÒ½ö½ö¿¼ÂÇÊµ²¿£¨Ô­ĞòÁĞÒ»¶¨ÎªÊµÊı£¿£©¡£
+			// ä¸ºä»€ä¹ˆæœ€åæ‰é™¤? çœ‹ä¸Šé€’å½’éƒ¨åˆ†ä»£ç  
+			// è€Œä¸”ä»…ä»…è€ƒè™‘å®éƒ¨ï¼ˆåŸåºåˆ—ä¸€å®šä¸ºå®æ•°ï¼Ÿï¼‰ã€‚
 			x[i].r /= L;
 }
 

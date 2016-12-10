@@ -24,13 +24,13 @@ int dcmp(double x) {
     else return x < 0 ? -1 : 1;
 }
 
-// TÊÇ×Ô¶¨Òå¾«¶ÈÀàĞÍ
-typedef struct Point{  //  ²»±ØÒªÊ±²»ÒªÓÃlong long£¬³Ë·¨ÔËËãÂıºÜ¶à 
+// Tæ˜¯è‡ªå®šä¹‰ç²¾åº¦ç±»å‹
+typedef struct Point{  //  ä¸å¿…è¦æ—¶ä¸è¦ç”¨long longï¼Œä¹˜æ³•è¿ç®—æ…¢å¾ˆå¤š 
     T x,y; 
     Point( T x=0 , T y=0):x(x),y(y){}
 }Vector; 
 
-Point operator - (const Point& a,const Point& b){ return Point(a.x-b.x,a.y-b.y);}  //³£Á¿ÒıÓÃÄÜ¿ìÒ»µãµã 
+Point operator - (const Point& a,const Point& b){ return Point(a.x-b.x,a.y-b.y);}  //å¸¸é‡å¼•ç”¨èƒ½å¿«ä¸€ç‚¹ç‚¹ 
 T Cross( const Point& a,const Point& b ){ return a.x*b.y - a.y*b.x ;}; 
 T Dot( const Point& a,const Point& b ){ return a.x*b.x + a.y*b.y; }; 
 double Length( const Point& a ){ return sqrt( ((double)a.x)*a.x + ((double)a.y)*a.y ); } 
@@ -56,52 +56,52 @@ Point getLineCircleIntersection( Point& A, Point& B, Circle C){
 	Vector v = B-A;
 	double a = v.x, b = A.x-C.c.x, c = v.y, d = A.y - C.c.y;
 	double e = a*a + c*c, f = 2*(a*b+c*d), g = b*b+d*d-C.r*C.r;
-	double delta = f*f - 4*e*g; // ÅĞ±ğÊ½
+	double delta = f*f - 4*e*g; // åˆ¤åˆ«å¼
 	
 	double t1,t2;
-	if( dcmp(delta) < 0 ) return 0; //ÏàÀë
-	if( dcmp(delta) == 0 ){ // ÏàÇĞ
+	if( dcmp(delta) < 0 ) return 0; //ç›¸ç¦»
+	if( dcmp(delta) == 0 ){ // ç›¸åˆ‡
 		t1 = t2 = -f/(2*e);
 	}
-	// Ïà½»
+	// ç›¸äº¤
 	t1 = (-f-sqrt(delta))/(2*e);
 	t2 = (-f+sqrt(delta))/(2*e);
-	// µ±µãAÔÚÔ²ÄÚ£¬ µãBÔÚÔ²ÍâÊ±£¬ t1,t2±Ø¶¨Ò»¸ö>0 Ò»¸öĞ¡ÓÚ0
-	// ²¢ÇÒ´óÓÚ0µÄÒ»µã¶ÔÓ¦Ô²Óë Ïß¶ÎABµÄ½»µã¡£
+	// å½“ç‚¹Aåœ¨åœ†å†…ï¼Œ ç‚¹Båœ¨åœ†å¤–æ—¶ï¼Œ t1,t2å¿…å®šä¸€ä¸ª>0 ä¸€ä¸ªå°äº0
+	// å¹¶ä¸”å¤§äº0çš„ä¸€ç‚¹å¯¹åº”åœ†ä¸ çº¿æ®µABçš„äº¤ç‚¹ã€‚
 	return Point(A.x+max(t1,t2)*v.x, A.y+max(t1,t2)*v.y);
 }
 
 double includedAngle( Vector& a, Vector& b){
-	// |a|,|b| ²»µÈÓÚ0
+	// |a|,|b| ä¸ç­‰äº0
 	double c = Dot(a,b)/(Length(a)*Length(b));
 	return acos(max(-1.0,min(c,1.0))); // refine the value of c 
 }
 
 double TriagnleCircleIntersectionArea( Circle& C, Point& A, Point& B, bool inner){
-	// ¼ÆËãÔ²C(Ô²ĞÄÎªc) ÓëÈı½ÇĞÎ cAB Ïà½»µÄÃæ»ı£¬ÇëÈ·±£Ïß¶ÎABÍêÈ«²»ÔÚÔ²ÄÚ»òÍêÈ«²»ÔÚÔ²Íâ£¬ÀûÓÃ²ÎÊıinner´«µİ
+	// è®¡ç®—åœ†C(åœ†å¿ƒä¸ºc) ä¸ä¸‰è§’å½¢ cAB ç›¸äº¤çš„é¢ç§¯ï¼Œè¯·ç¡®ä¿çº¿æ®µABå®Œå…¨ä¸åœ¨åœ†å†…æˆ–å®Œå…¨ä¸åœ¨åœ†å¤–ï¼Œåˆ©ç”¨å‚æ•°innerä¼ é€’
 	if( inner )
-		return 0.5*Cross(A-C.c, B-C.c ); // ÕâÀï¼ÆËãÓĞÏòÃæ»ı£¬·½Ïò×ÔĞĞÅÅĞò
+		return 0.5*Cross(A-C.c, B-C.c ); // è¿™é‡Œè®¡ç®—æœ‰å‘é¢ç§¯ï¼Œæ–¹å‘è‡ªè¡Œæ’åº
 	else{
 		double theta = includedAngle( A-C.c, B-C.c );
 		return dcmp(Cross(A-C.c, B-C.c ))*0.5*theta*C.r*C.r;
 	}
 }
 
-// ¼ÆËãÏòÁ¿¼«½Ç
+// è®¡ç®—å‘é‡æè§’
 double angle( Vector v ){ return atan2(v.y,v.x); }
-// Á½Ô²Ïà½»
+// ä¸¤åœ†ç›¸äº¤
 int getCircleCircleIntersection( Circle C1, Circle C2, vector<Point>& sol, vector<double>& agl ){
 	double d = Length( C1.c-C2.c );
 	if( dcmp(d) == 0 ){
-		if( dcmp(C1.r - C2.r )==0 ) return -1; // Á½Ô²ÖØºÏ
-		return 0; // Ô²ĞÄÖØºÏ°ë¾¶²»Í¬
+		if( dcmp(C1.r - C2.r )==0 ) return -1; // ä¸¤åœ†é‡åˆ
+		return 0; // åœ†å¿ƒé‡åˆåŠå¾„ä¸åŒ
 	}
-	if( dcmp( C1.r+C2.r-d ) < 0 ) return 0; // ÍâÀë
-	if( dcmp( fabs(C1.r-C2.r)-d) > 0 ) return 0; // ÏàÇĞ
+	if( dcmp( C1.r+C2.r-d ) < 0 ) return 0; // å¤–ç¦»
+	if( dcmp( fabs(C1.r-C2.r)-d) > 0 ) return 0; // ç›¸åˆ‡
 
-	double a = angle( C2.c-C1.c );	// ÏòÁ¿C1C2µÄ¼«½Ç
+	double a = angle( C2.c-C1.c );	// å‘é‡C1C2çš„æè§’
 	double da = acos( (C1.r*C1.r+d*d-C2.r*C2.r)/(2*C1.r*d) );
-	// C1C2 µ½C1P1µÄ½Ç
+	// C1C2 åˆ°C1P1çš„è§’
 	Point p1 = C1.point(a-da), p2 = C1.point(a+da);
 
 	agl.clear();
@@ -110,6 +110,6 @@ int getCircleCircleIntersection( Circle C1, Circle C2, vector<Point>& sol, vecto
 	if( dcmp(p1.x-p2.x)==0 && dcmp(p1.y-p2.y)==0 ) return 1;
 	//sol.push_back( p2);
 	agl.push_back(a+da);
-	// C1ÉÏ´Óp1µ½p2µÄÒ»¶Î»¡ÔÚC2ÄÚ
+	// C1ä¸Šä»p1åˆ°p2çš„ä¸€æ®µå¼§åœ¨C2å†…
 	return 2;
 }

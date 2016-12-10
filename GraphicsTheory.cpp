@@ -12,23 +12,23 @@ vector<Edge> G[maxn*maxn];
 void Dijkstra(int st){
 	memset(done,0,sizeof(done));
 	memset(dist,-1,sizeof(dist));
-	priority_queue<pii,vector<pii>,greater<pii> >q;//²»ÓÃgreaterÊ±Ê¡ÂÔ£¬Ä¬ÈÏÎª´ó¸ù¶Ñ q.push(make_pair(dist[a],a));/ÆğÊ¼µã¼ÓÈë¶ÓÁĞ 
+	priority_queue<pii,vector<pii>,greater<pii> >q;//ä¸ç”¨greateræ—¶çœç•¥ï¼Œé»˜è®¤ä¸ºå¤§æ ¹å † q.push(make_pair(dist[a],a));/èµ·å§‹ç‚¹åŠ å…¥é˜Ÿåˆ— 
 	q.push( pii(0,st) );
 	dist[st] = 0;
 	while(!q.empty()) 
 	{ 
 		pii u= q.top();q.pop(); 
-		int x=u.second;//x»ñµÃu¶ÔÓ¦µÄ½áµã±àºÅ 
+		int x=u.second;//xè·å¾—uå¯¹åº”çš„ç»“ç‚¹ç¼–å· 
 		if(done[x]) continue;	
-		//Dijkstra¶ÔÃ¿¸ö½áµãÖ»×öÒ»´Î£¬ËùÒÔ²»ÓÃµ£ĞÄÏÂÃæ½«Ä³Ò»½áµãÖØ¸´¼ÓÈë¶ÓÁĞ 
+		//Dijkstraå¯¹æ¯ä¸ªç»“ç‚¹åªåšä¸€æ¬¡ï¼Œæ‰€ä»¥ä¸ç”¨æ‹…å¿ƒä¸‹é¢å°†æŸä¸€ç»“ç‚¹é‡å¤åŠ å…¥é˜Ÿåˆ— 
 		done[x]=1; 
-		int j=G[x].size();//GÊÇÓÃvector×öµÄÁ´±í 
+		int j=G[x].size();//Gæ˜¯ç”¨vectoråšçš„é“¾è¡¨ 
 		int t ,v; 
 		for(int i=0;i<j;i++){ 
 			v=G[x][i].v; 
 			t=dist[x]+G[x][i].w; 
-			//if(t<=600)//´øÉî¶ÈÏŞÖÆ£¬ÕâÀïÊÇ600 
-			if(dist[v]<0||dist[v]>t){ //ÕâÀï½«dist³õÊ¼»¯Îª-1Ìæ´úÁËINF 
+			//if(t<=600)//å¸¦æ·±åº¦é™åˆ¶ï¼Œè¿™é‡Œæ˜¯600 
+			if(dist[v]<0||dist[v]>t){ //è¿™é‡Œå°†diståˆå§‹åŒ–ä¸º-1æ›¿ä»£äº†INF 
 				dist[v]=t;
 				q.push(make_pair(dist[v],v)); 
 			} 
@@ -36,28 +36,28 @@ void Dijkstra(int st){
 	} 
 }
 
-//×îĞ¡Éú³ÉÊ÷ prim Ëã·¨£¬Á¬Í¨Í¼ÉÏµÄËùÓĞ N ¸öµã£¬²¢ÇÒÊ¹µÃÁ¬½ÓµÄÏß¶ÎµÄ×Ü³¤×î¶Ì£¬
-// ¸´ÔÓ¶È O(mlogm)£¬ mÊÇ±ßÊı
-int inTree[maxn]; //		±ê¼Ç½áµãÊÇ·ñÔÚÉú³ÉÊ÷ÄÚ
+//æœ€å°ç”Ÿæˆæ ‘ prim ç®—æ³•ï¼Œè¿é€šå›¾ä¸Šçš„æ‰€æœ‰ N ä¸ªç‚¹ï¼Œå¹¶ä¸”ä½¿å¾—è¿æ¥çš„çº¿æ®µçš„æ€»é•¿æœ€çŸ­ï¼Œ
+// å¤æ‚åº¦ O(mlogm)ï¼Œ mæ˜¯è¾¹æ•°
+int inTree[maxn]; //		æ ‡è®°ç»“ç‚¹æ˜¯å¦åœ¨ç”Ÿæˆæ ‘å†…
 int prim(int n){	
 	int d(0);
 	memset( inTree,0,sizeof(inTree));
-	int s = 0; inTree[s] = 1; // Ëæ±ã½«Ò»¸ö½áµãi·ÅÈëÉú³ÉÊ÷,ÕâÀïÊÇµÚÒ»¸ö½áµã
+	int s = 0; inTree[s] = 1; // éšä¾¿å°†ä¸€ä¸ªç»“ç‚¹iæ”¾å…¥ç”Ÿæˆæ ‘,è¿™é‡Œæ˜¯ç¬¬ä¸€ä¸ªç»“ç‚¹
 	priority_queue<pii,vector<pii>,greater<pii> > q;
-	for( int h = head[s]; h!=-1; h=edges[h].next ) // ¸üĞÂ¸÷½áµãµ½Éú³ÉÊ÷µÄ¾àÀë
+	for( int h = head[s]; h!=-1; h=edges[h].next ) // æ›´æ–°å„ç»“ç‚¹åˆ°ç”Ÿæˆæ ‘çš„è·ç¦»
 		q.push( pii( edges[h].w, edges[h].v ) );
 	
-	for( int i(1); i < n ; i++ ){ // Ã¿´ÎÕÒµÃ1¶Î£¬×ö n-1´ÎÑ­»· 
-		while( inTree[q.top().second] ) q.pop(); // Èô´æÔÚ0È¨±ß£¬¿ÉÄÜruntime errorÂğ?
+	for( int i(1); i < n ; i++ ){ // æ¯æ¬¡æ‰¾å¾—1æ®µï¼Œåš n-1æ¬¡å¾ªç¯ 
+		while( inTree[q.top().second] ) q.pop(); // è‹¥å­˜åœ¨0æƒè¾¹ï¼Œå¯èƒ½runtime errorå—?
 		int p = q.top().second;
 		inTree[p] = 1; d += q.top().first; q.pop();
-		for( int h = head[p]; h!=-1; h=edges[h].next ) // ¸üĞÂ¸÷½áµãµ½Éú³ÉÊ÷µÄ¾àÀë
+		for( int h = head[p]; h!=-1; h=edges[h].next ) // æ›´æ–°å„ç»“ç‚¹åˆ°ç”Ÿæˆæ ‘çš„è·ç¦»
 			q.push( pii(edges[h].w, edges[h].v) );
 	}
 	return d;
 }
 
-// ×î´óÁ÷Ëã·¨ ÏŞÊ±³Ô½ôµÄÇé¿öÏÂÇë¾¡Á¿Ñ¹ËõnµÄ´óĞ¡£¬²âÊÔÑùÀıÎ´±Ø¼«¶Ë
+// æœ€å¤§æµç®—æ³• é™æ—¶åƒç´§çš„æƒ…å†µä¸‹è¯·å°½é‡å‹ç¼©nçš„å¤§å°ï¼Œæµ‹è¯•æ ·ä¾‹æœªå¿…æç«¯
 int head[maxn],p[maxn],d[maxn],cur[maxn],num[maxn];
 bool vis[maxn];
 struct Edge{
@@ -89,7 +89,7 @@ struct ISAP{
 	}
 
 	void backwardBFS(){	
-		memset( vis, 0 , sizeof(bool)*n ); // ×¢ÒâboolĞÍÓëintĞÍ´óĞ¡²»Ò»ÑùÅ¶
+		memset( vis, 0 , sizeof(bool)*n ); // æ³¨æ„boolå‹ä¸intå‹å¤§å°ä¸ä¸€æ ·å“¦
 		queue<int> Q;
 		Q.push(t); d[t] = 0; vis[t] =true;
 		while( !Q.empty() ){
@@ -105,8 +105,8 @@ struct ISAP{
 		}
 		//return vis[s];
 	}
-	// ²»Ê¹ÓÃÊ¹ÓÃdfsµİ¹éµØÊµÏÖÕÒÔö¹ãÂ·(²¢ÇÒÊµÏÖÍ¬Ê±Ôö¹ã¶àÌõ)£¬¶øÊÇ´ÓÔ´µã¿ªÊ¼Ò»ÌõÒ»ÌõµØÕÒ
-	// ÕÒµ½ºó¶ÔÕûÌõÂ·¾¶½øĞĞÔö¹ã²Ù×÷¡£
+	// ä¸ä½¿ç”¨ä½¿ç”¨dfsé€’å½’åœ°å®ç°æ‰¾å¢å¹¿è·¯(å¹¶ä¸”å®ç°åŒæ—¶å¢å¹¿å¤šæ¡)ï¼Œè€Œæ˜¯ä»æºç‚¹å¼€å§‹ä¸€æ¡ä¸€æ¡åœ°æ‰¾
+	// æ‰¾åˆ°åå¯¹æ•´æ¡è·¯å¾„è¿›è¡Œå¢å¹¿æ“ä½œã€‚
 	int Augmetn(){
 		int u = t, a = INT_MAX;
 		while( u != s ){
@@ -131,12 +131,12 @@ struct ISAP{
 		for(int i(0) ; i < n ; i++ ) num[d[i]]++;
 		int u = s;
 		memcpy( cur, head, sizeof(int)*n );
-		while( d[s] < n ){ // ÈÎ´æÔÚ´Ósµ½tµÄÂ·¾¶
-			if( u == t ){ // DFSµ½´ï»ãµã
+		while( d[s] < n ){ // ä»»å­˜åœ¨ä»såˆ°tçš„è·¯å¾„
+			if( u == t ){ // DFSåˆ°è¾¾æ±‡ç‚¹
 				flow += Augmetn();
 				u = s;
 			}
-			int ok = 0; // ×èÈû±ê¼Ç
+			int ok = 0; // é˜»å¡æ ‡è®°
 			for( int h = cur[u] ; h!=-1 ; h = edges[h].next ){
 				Edge& e = edges[h];
 				if( e.cap > e.flow && d[u] == d[e.to] + 1 ){ // Advance
@@ -150,12 +150,12 @@ struct ISAP{
 
 			if( !ok ){
 				int m = n-1;	// Retreat
-				// ±»×èÈû²»Ò»¶¨ÊÇÃ»ÓĞÂ·¿É×ß£¬¶øÊÇ¸ÃÂ·²»Âú×ãdµÄÌõ¼ş£¬ĞèÒª¸üĞÂd
+				// è¢«é˜»å¡ä¸ä¸€å®šæ˜¯æ²¡æœ‰è·¯å¯èµ°ï¼Œè€Œæ˜¯è¯¥è·¯ä¸æ»¡è¶³dçš„æ¡ä»¶ï¼Œéœ€è¦æ›´æ–°d
 				for( int h = head[u] ; h != -1 ; h = edges[h].next ){
 					Edge& e = edges[h];
 					if(e.cap > e.flow) m = min(m, d[e.to] );
-				}	// d[u] ÑÏ¸ñµİÔö
-				if( --num[d[u]] == 0 ) break; // gap ÓÅ»¯
+				}	// d[u] ä¸¥æ ¼é€’å¢
+				if( --num[d[u]] == 0 ) break; // gap ä¼˜åŒ–
 				num[d[u] = m+1 ] ++;
 				cur[u] = head[u];
 				if( u!=s ) u = edges[p[u]].from;
@@ -165,23 +165,23 @@ struct ISAP{
 	}
 };
 
-//×î´óÁ÷ÎÊÌâ Dinic
+//æœ€å¤§æµé—®é¢˜ Dinic
 struct Edge{ 
 	int from, to, cap, flow; 
 	Edge( int fr,int t, int c, int fl ):from(fr),to(t),cap(c),flow(fl){}; 
 }; 
 struct Dinic{ 
-	int n,m,s,t;    //½áµãÊı£¬±ßÊı£¨°üÀ¨·´Ïòºü£©£¬Ô´µã±àºÅ£¬»ãµã±àºÅ 
-	vector <Edge> edges;  //±ßÊı¡£edges[e] ºÍ edges[e^1]»¥Îª·´Ïòºü 
-	vector <int> G[maxn]; //ÁÚ½Ó±í£¬G[i][j] ±íÊ¾½áµãiµÄµÚjÌõ±ßÔÚeÊı×éÖĞµÄĞòºÅ 
-	bool vis[maxn];    //BFS Ê¹ÓÃ 
-	int d[maxn];    //´ÓÆğµãµ½iµÄ¾àÀë 
-	int cur[maxn];    //µ±Ç°»¡ÏÂ±ê,¼ÓËÙÓÃ 
+	int n,m,s,t;    //ç»“ç‚¹æ•°ï¼Œè¾¹æ•°ï¼ˆåŒ…æ‹¬åå‘ç‹ï¼‰ï¼Œæºç‚¹ç¼–å·ï¼Œæ±‡ç‚¹ç¼–å· 
+	vector <Edge> edges;  //è¾¹æ•°ã€‚edges[e] å’Œ edges[e^1]äº’ä¸ºåå‘ç‹ 
+	vector <int> G[maxn]; //é‚»æ¥è¡¨ï¼ŒG[i][j] è¡¨ç¤ºç»“ç‚¹içš„ç¬¬jæ¡è¾¹åœ¨eæ•°ç»„ä¸­çš„åºå· 
+	bool vis[maxn];    //BFS ä½¿ç”¨ 
+	int d[maxn];    //ä»èµ·ç‚¹åˆ°içš„è·ç¦» 
+	int cur[maxn];    //å½“å‰å¼§ä¸‹æ ‡,åŠ é€Ÿç”¨ 
  
 	void init(int n = 0){  
 		edges.clear(); 
 		m = 0; 
-		for( int i = 0 ; i < n ; i++ ) //½áµã±àºÅÓĞ¿ÉÄÜµÈÓÚnÊ±£¬Ò»¶¨ÒªÓÃ "<=" ,×îºÃµ÷Õû´«ÈëµÄ²ÎÊı
+		for( int i = 0 ; i < n ; i++ ) //ç»“ç‚¹ç¼–å·æœ‰å¯èƒ½ç­‰äºnæ—¶ï¼Œä¸€å®šè¦ç”¨ "<=" ,æœ€å¥½è°ƒæ•´ä¼ å…¥çš„å‚æ•°
 			G[i].clear(); 
 	}; 
 	void AddEdge( int from , int to , int cap ){ 
@@ -194,15 +194,15 @@ struct Dinic{
 		G[to].push_back( m-1 ); 
 	} 
  
-	bool BFS(){  //½¨Á¢²ã´ÎÍ¼ 
+	bool BFS(){  //å»ºç«‹å±‚æ¬¡å›¾ 
 		memset( vis , 0 , sizeof(vis) ); 
 		queue<int> Q; 
-		Q.push(s);  d[s] = 0;  vis[s] = 1;  //³õÊ¼»¯ 
+		Q.push(s);  d[s] = 0;  vis[s] = 1;  //åˆå§‹åŒ– 
 		while( !Q.empty() ){ 
 			int x = Q.front(); Q.pop(); 
 			for( int i = 0 ; i < G[x].size() ; i++ ){ 
 				Edge& e = edges[G[x][i]]; 
-				if( !vis[e.to] && e.cap > e.flow ){ //Ö»¿¼ÂÇ²ĞÁôÍøÂçÖĞµÄ»¡ 
+				if( !vis[e.to] && e.cap > e.flow ){ //åªè€ƒè™‘æ®‹ç•™ç½‘ç»œä¸­çš„å¼§ 
 					vis[e.to] = 1; 
 					d[e.to] = d[x] + 1; 
 					Q.push( e.to ); 
@@ -215,14 +215,14 @@ struct Dinic{
 	int DFS( int x ,int a ){ //
 		if( x==t || a == 0 ) return a ; 
 		int flow = 0 ,f; 
-		for( int& i = cur[x]; i < G[x].size() ; i++ ){ //´ÓÉÏ´Î¿¼ÂÇµÄ»¡¿ªÊ¼ 
+		for( int& i = cur[x]; i < G[x].size() ; i++ ){ //ä»ä¸Šæ¬¡è€ƒè™‘çš„å¼§å¼€å§‹ 
 			Edge& e = edges[G[x][i]]; 
-			if( d[x] + 1 == d[e.to] &&   (f = DFS( e.to , min(a, e.cap-e.flow ))) > 0 ){//!!!¸³ÖµÔËËã·ûÓÅÏÈ¼¶×îµÍ 
+			if( d[x] + 1 == d[e.to] &&   (f = DFS( e.to , min(a, e.cap-e.flow ))) > 0 ){//!!!èµ‹å€¼è¿ç®—ç¬¦ä¼˜å…ˆçº§æœ€ä½ 
 				e.flow += f;    
 				edges[G[x][i]^1].flow -= f; 
 				flow += f; 
 				a -= f; 
-				if( a==0 ) break; // ¸Ã»¡Ã»ÓĞ²ĞÁôÁË£¬ÎŞĞè¼ÌĞøÉîËÑ ×î´óÁ÷ÎÊÌâ 
+				if( a==0 ) break; // è¯¥å¼§æ²¡æœ‰æ®‹ç•™äº†ï¼Œæ— éœ€ç»§ç»­æ·±æœ æœ€å¤§æµé—®é¢˜ 
 			}
 		}
 		return flow; 
@@ -238,8 +238,8 @@ struct Dinic{
 	} 	
 };
 
-// dfsĞò£¬·Çµİ¹é
-// DI: ÈëĞò£¬ DO: ³öĞò£¬ L:²ã´Î
+// dfsåºï¼Œéé€’å½’
+// DI: å…¥åºï¼Œ DO: å‡ºåºï¼Œ L:å±‚æ¬¡
 int fa[maxn],cur[maxn];
 vector<int> getDFSOrder( int rootIdx, int *headIdx, int *DI, int *DO, int* L ){	
 	vector<int> D;
@@ -247,7 +247,7 @@ vector<int> getDFSOrder( int rootIdx, int *headIdx, int *DI, int *DO, int* L ){
 	memcpy( cur, headIdx, sizeof(cur) );
 	int u(rootIdx), v(rootIdx), h;
 	fa[rootIdx] = -1;
-	// ¸ù½Úµã
+	// æ ¹èŠ‚ç‚¹
 	DI[rootIdx]=D.size(),L[rootIdx]=1;
 	D.push_back(rootIdx);
 	while( u >= 0 ){
@@ -259,24 +259,24 @@ vector<int> getDFSOrder( int rootIdx, int *headIdx, int *DI, int *DO, int* L ){
 		}
 		h = cur[u];
 		v = edges[h].v;
-		cur[u] = edges[h].next;	// É¾³ı¸Ã±ß£¬Ã¿Ìõ±ßÖ»ÓÃÒ»´Î		
+		cur[u] = edges[h].next;	// åˆ é™¤è¯¥è¾¹ï¼Œæ¯æ¡è¾¹åªç”¨ä¸€æ¬¡		
 		if( DI[v] == -1 ){ // first visit
 			DI[v] = D.size();
 			D.push_back( v );
 			fa[v] = u;
 			L[v] = L[fa[v]]+1;
 		}
-		else{//Ò»Ìõ»ØËİµÄ±ß£¬ÎÒÃÇ²»´¦Àí
+		else{//ä¸€æ¡å›æº¯çš„è¾¹ï¼Œæˆ‘ä»¬ä¸å¤„ç†
 			v = u;
 		}
 	}
 	return D;
 }
 
-// ×î½ü¹«¹²×æÏÈµÄÔÚÏß²éÑ¯Ëã·¨ <O(N*logN,1)>
+// æœ€è¿‘å…¬å…±ç¥–å…ˆçš„åœ¨çº¿æŸ¥è¯¢ç®—æ³• <O(N*logN,1)>
 int E[maxn*2],I[maxn],O[maxn],L[maxn],EL[maxn*2];
 struct LCA{
-	// E ÊÇDFSËÑË÷µÄÅ·À­Ğò,I¼ÇÂ¼½ÚµãµÚÒ»´Î³öÏÖ(½øÈë£©ÔÚEÖĞµÄÏÂ±ê£¬O¼ÇÂ¼½Úµã×îºóÒ»´Î³öÏÖ£¨Àë¿ª£©ÔÚEÖĞµÄÏÂ±ê¡£	
+	// E æ˜¯DFSæœç´¢çš„æ¬§æ‹‰åº,Iè®°å½•èŠ‚ç‚¹ç¬¬ä¸€æ¬¡å‡ºç°(è¿›å…¥ï¼‰åœ¨Eä¸­çš„ä¸‹æ ‡ï¼ŒOè®°å½•èŠ‚ç‚¹æœ€åä¸€æ¬¡å‡ºç°ï¼ˆç¦»å¼€ï¼‰åœ¨Eä¸­çš„ä¸‹æ ‡ã€‚	
 	int CUR_IDX;
 	void DFS( int u , int level, int fa){
 		// first visit insertion
@@ -305,10 +305,10 @@ struct LCA{
 	}
 };
 
-// LCA ÀëÏß²éÑ¯ O(n+#query£©
-int root[maxn],vis[maxn],lca[maxn*2];	// Ã¿Ìì²éÑ¯Ò²ÒÔ±ßµÄĞÎÊ½¼ÇÂ¼(Ë«Ïò),Æä½á¹û´æÓÚlcaÖĞ£¬±ğÓÃvector<vector<int>>
+// LCA ç¦»çº¿æŸ¥è¯¢ O(n+#queryï¼‰
+int root[maxn],vis[maxn],lca[maxn*2];	// æ¯å¤©æŸ¥è¯¢ä¹Ÿä»¥è¾¹çš„å½¢å¼è®°å½•(åŒå‘),å…¶ç»“æœå­˜äºlcaä¸­ï¼Œåˆ«ç”¨vector<vector<int>>
 struct Tarjan{
-	void process(int n, int rootIdx){// n: ×î´ó½áµã±àºÅ¼Ó1
+	void process(int n, int rootIdx){// n: æœ€å¤§ç»“ç‚¹ç¼–å·åŠ 1
 		for( int i(0) ; i < n ; i++ )
 			root[i] = i;
 		memset( vis,0,sizeof(int)*n );
@@ -323,33 +323,33 @@ struct Tarjan{
 			int v = edges[i].v;
 			if( vis[v] ) continue;
 			// first visit
-			// µİ¹éµ÷ÓÃ
+			// é€’å½’è°ƒç”¨
 			DFS( v );					
-			// ½«uÓëÒÔÆä×Ó½ÚµãvÎª¸ùµÄ×ÓÊ÷ºÏ²¢
+			// å°†uä¸ä»¥å…¶å­èŠ‚ç‚¹vä¸ºæ ¹çš„å­æ ‘åˆå¹¶
 			root[v] = u;
 		}
-		// ´¦ÀíÓëuÏà¹ØµÄ²éÑ¯
+		// å¤„ç†ä¸uç›¸å…³çš„æŸ¥è¯¢
 		for( int h = queriesHead[u] ; h!=-1 ; h = queries[h].next )
 			if( vis[queries[h].v] )
 				lca[h] = lca[h^1] = find( queries[h].v ) ;
 	}
 };
 
-// ²¢²é¼¯ 
-//´øÂ·¾¶Ñ¹ËõµÄÕÒ¸ù½áµãº¯Êı 
+// å¹¶æŸ¥é›† 
+//å¸¦è·¯å¾„å‹ç¼©çš„æ‰¾æ ¹ç»“ç‚¹å‡½æ•° 
 int find(int x){return root[x]==x?x:root[x]=find(root[x]);} 
 
 // 2-sat(2-satisfiability)
-// ¸ÃÀàÎÊÌâ³éÏóÎª£ºÓĞÒ»ÏµÁĞ²¼¶ûĞÍ±äÁ¿X={x1,x2,...,xi},ÆäÖĞÄ³Ğ©±äÁ¿¶Ô´æÔÚÔ¼Êø¹ØÏµÈçxi!=xjÎªÕæ£¬ÎÊÊÇ·ñ´æÔÚÂú×ãÔ¼ÊøµÄºÏ·¨½â¡£
+// è¯¥ç±»é—®é¢˜æŠ½è±¡ä¸ºï¼šæœ‰ä¸€ç³»åˆ—å¸ƒå°”å‹å˜é‡X={x1,x2,...,xi},å…¶ä¸­æŸäº›å˜é‡å¯¹å­˜åœ¨çº¦æŸå…³ç³»å¦‚xi!=xjä¸ºçœŸï¼Œé—®æ˜¯å¦å­˜åœ¨æ»¡è¶³çº¦æŸçš„åˆæ³•è§£ã€‚
 struct TwoSAT{ 
 	int n; 
 	vector<int> G[maxn*2]; 
 	bool mark[maxn*2]; 
-	int S[maxn*2],c; //¼ÇÂ¼Ò»Ìõdfs½øĞĞµÄÂ·¾¶£¬ÓÃÓÚ»ØËİ
+	int S[maxn*2],c; //è®°å½•ä¸€æ¡dfsè¿›è¡Œçš„è·¯å¾„ï¼Œç”¨äºå›æº¯
  
 	bool dfs( int x ){ 
-	if( mark[x^1] ) return false;//  ¸ù¾İ¹¹½¨µÄ±ßÍÆµ¼£¬³öÏÖÃ¬¶ÜÔò·µ»Øfalse 
-	if( mark[x] ) return true;  //  ËãÊÇ¼ôÖ¦ 
+	if( mark[x^1] ) return false;//  æ ¹æ®æ„å»ºçš„è¾¹æ¨å¯¼ï¼Œå‡ºç°çŸ›ç›¾åˆ™è¿”å›false 
+	if( mark[x] ) return true;  //  ç®—æ˜¯å‰ªæ 
 		mark[x] = true; 
 		S[c++] = x; 
 		for( int i = 0 ;   i < G[x].size(); i++ )if( !dfs( G[x][i] ) ) return false; 
@@ -363,11 +363,11 @@ struct TwoSAT{
 		memset( mark,0,sizeof( mark ) );//   
 	} 
  
-	//  Ôö¼ÓÌõ¼ş ( x==xval or y==yval) == true 
-	//  xval,yval Îª 0£¨¶¨ÒåÎªÕæ£©»ò 1 
-	//  Èô¹ûx²»µÈÓÚy (x = !y),  ÔòÏàµ±ÓÚÔö¼ÓÁ½¸öÌõ¼ş( x==0 or y==0)==true ºÍ ( x==1 or y==1 )==true 
+	//  å¢åŠ æ¡ä»¶ ( x==xval or y==yval) == true 
+	//  xval,yval ä¸º 0ï¼ˆå®šä¹‰ä¸ºçœŸï¼‰æˆ– 1 
+	//  è‹¥æœxä¸ç­‰äºy (x = !y),  åˆ™ç›¸å½“äºå¢åŠ ä¸¤ä¸ªæ¡ä»¶( x==0 or y==0)==true å’Œ ( x==1 or y==1 )==true 
 	void add_clause( int x, int xval, int y, int yval ){ 
-		x = x*2 + xval; // Ã¿¸ö½áµãx²ğ·ÖÎªÁ½¸ö½áµã x*2 Óë x*2+1
+		x = x*2 + xval; // æ¯ä¸ªç»“ç‚¹xæ‹†åˆ†ä¸ºä¸¤ä¸ªç»“ç‚¹ x*2 ä¸ x*2+1
 		y = y*2 + yval; 
 		G[x^1].push_back( y ); 
 		G[y^1].push_back( x ); 
@@ -385,7 +385,7 @@ struct TwoSAT{
 	} 
 }; 
 
-// ¶ş·ÖÍ¼ÅĞ¶Ï²¢ÇÒ±ê¼Ç color[i] == 1 »ò 2·Ö±ğ±íÊ¾Á½¸ö×ÓÍ¼
+// äºŒåˆ†å›¾åˆ¤æ–­å¹¶ä¸”æ ‡è®° color[i] == 1 æˆ– 2åˆ†åˆ«è¡¨ç¤ºä¸¤ä¸ªå­å›¾
 int color[maxn];
 bool solve( int n){
 	for( int i(1); i <= n ; i++ )if( !color[i] ){
@@ -407,19 +407,19 @@ bool solve( int n){
 }
 
 
-// ¶ş·ÖÍ¼µÄ×î´óÆ¥Åä ĞÙÑÀÀûËã·¨ 
+// äºŒåˆ†å›¾çš„æœ€å¤§åŒ¹é… åŒˆç‰™åˆ©ç®—æ³• 
 vector<int> G[maxn];
-int used[maxn],mat[maxn]; // mat[i] ±íÊ¾×ó×ÓÍ¼ÖĞÓëÓÒ×ÓÍ¼½áµãiÆ¥ÅäµÄ½áµã±àºÅ
-bool hungery(int u){ // mat³õÊ¼»¯1´Î£¬ usedÔÚÃ¿´Îµ÷ÓÃhungeryÇ°£¨²»°üÀ¨µİ¹éµ÷ÓÃ£©³õÊ¼»¯
+int used[maxn],mat[maxn]; // mat[i] è¡¨ç¤ºå·¦å­å›¾ä¸­ä¸å³å­å›¾ç»“ç‚¹iåŒ¹é…çš„ç»“ç‚¹ç¼–å·
+bool hungery(int u){ // matåˆå§‹åŒ–1æ¬¡ï¼Œ usedåœ¨æ¯æ¬¡è°ƒç”¨hungeryå‰ï¼ˆä¸åŒ…æ‹¬é€’å½’è°ƒç”¨ï¼‰åˆå§‹åŒ–
 	for(int i=0;i < G[u].size();i++){ 
-		int v = G[u][i]; // Á´±í
-		//c ÊÇÆäÖĞÒ»¸öÓë u(a)ÏàÁ¬µÄÓÒ×ÓÍ¼ÀïµÄµã£¨¼´ËûÃÇÓÒ×ÓÍ¼µÄ v Óë×ó×ÓÍ¼µÄ u ´æÔÚ±ß£© 
-		if(!used[v]){//¶ÔÓÚÃ¿¸ö a ¶øÑÔ£¬ÅĞ¶Ï v ÊÇ·ñ·ÃÎÊ¹ı£¬ÊôÓÚdfs¼ôÖ¦
+		int v = G[u][i]; // é“¾è¡¨
+		//c æ˜¯å…¶ä¸­ä¸€ä¸ªä¸ u(a)ç›¸è¿çš„å³å­å›¾é‡Œçš„ç‚¹ï¼ˆå³ä»–ä»¬å³å­å›¾çš„ v ä¸å·¦å­å›¾çš„ u å­˜åœ¨è¾¹ï¼‰ 
+		if(!used[v]){//å¯¹äºæ¯ä¸ª a è€Œè¨€ï¼Œåˆ¤æ–­ v æ˜¯å¦è®¿é—®è¿‡ï¼Œå±äºdfså‰ªæ
 			used[v] = 1;			
-		//2 ÖÖÇé¿öÈÎÒ»³ÉÁ¢Ôò×ÜÆ¥ÅäÊı¼ÓÒ»£¬¾ÍÊÇ mainº¯ÊıÀïµÄ sum++
-			if(mat[v]==-1||hungery(mat[v])){ //ÕâÁ½¸öÌõ¼ş²»ÄÜ½»»»Î»ÖÃ
-				//1. v Î´±»Æ¥Åä£¬ Ö±½Ó½«uÓëvÆ¥Åä
-				//2. ×ó×ÓÍ¼ÖĞµÄmat[v]ÕÒµ½ÓÒ×ÓÍ¼ÖĞvÒÔÍâµÄÆ¥Åäµãk,¼´ÓĞ¸üĞÂmat[k]=mat[v], mat[v] = u
+		//2 ç§æƒ…å†µä»»ä¸€æˆç«‹åˆ™æ€»åŒ¹é…æ•°åŠ ä¸€ï¼Œå°±æ˜¯ mainå‡½æ•°é‡Œçš„ sum++
+			if(mat[v]==-1||hungery(mat[v])){ //è¿™ä¸¤ä¸ªæ¡ä»¶ä¸èƒ½äº¤æ¢ä½ç½®
+				//1. v æœªè¢«åŒ¹é…ï¼Œ ç›´æ¥å°†uä¸våŒ¹é…
+				//2. å·¦å­å›¾ä¸­çš„mat[v]æ‰¾åˆ°å³å­å›¾ä¸­vä»¥å¤–çš„åŒ¹é…ç‚¹k,å³æœ‰æ›´æ–°mat[k]=mat[v], mat[v] = u
 				mat[v]=u; 
 				return true; 
 			}  
@@ -428,12 +428,12 @@ bool hungery(int u){ // mat³õÊ¼»¯1´Î£¬ usedÔÚÃ¿´Îµ÷ÓÃhungeryÇ°£¨²»°üÀ¨µİ¹éµ÷ÓÃ£©
 	return false; 
 } 
 
-// ¶ş·ÖÍ¼µÄÆ¥ÅäÎÊÌâ
-// 1. ×îĞ¡µã¸²¸ÇµÄµãÊı(ÓÃ×îÉÙµÄµã¸²¸ÇËùÓĞµÄ±ß) = ¶ş·ÖÍ¼×î´óÆ¥Åä£¨Æ¥Åä¶ÔµÄÊıÄ¿£©
-//		Ö±¹ÛµÄÀí½âÊÇ£¬×î´óÆ¥ÅäÏÂ£¬ÈÎºÎ±ß¶¼±»¸²¸ÇÁË£¬¶øÇÒÈ¥µôÈÎºÎÒ»¸öÆ¥Åä¶¼µ¼ÖÂÎ´±»¸²¸ÇµÄ±ß
-// 2. ×î´ó¶ÀÁ¢¼¯µÄµãÊı(Ñ¡³öÒ»¸ö×î´ó×Ó¼¯£¬Ê¹µÃ×Ó¼¯ÄÚµÄµã¶¼ÎŞ±ß£© = ×ÜµãÊı - ¶ş·ÖÍ¼×î´óÆ¥Åä
+// äºŒåˆ†å›¾çš„åŒ¹é…é—®é¢˜
+// 1. æœ€å°ç‚¹è¦†ç›–çš„ç‚¹æ•°(ç”¨æœ€å°‘çš„ç‚¹è¦†ç›–æ‰€æœ‰çš„è¾¹) = äºŒåˆ†å›¾æœ€å¤§åŒ¹é…ï¼ˆåŒ¹é…å¯¹çš„æ•°ç›®ï¼‰
+//		ç›´è§‚çš„ç†è§£æ˜¯ï¼Œæœ€å¤§åŒ¹é…ä¸‹ï¼Œä»»ä½•è¾¹éƒ½è¢«è¦†ç›–äº†ï¼Œè€Œä¸”å»æ‰ä»»ä½•ä¸€ä¸ªåŒ¹é…éƒ½å¯¼è‡´æœªè¢«è¦†ç›–çš„è¾¹
+// 2. æœ€å¤§ç‹¬ç«‹é›†çš„ç‚¹æ•°(é€‰å‡ºä¸€ä¸ªæœ€å¤§å­é›†ï¼Œä½¿å¾—å­é›†å†…çš„ç‚¹éƒ½æ— è¾¹ï¼‰ = æ€»ç‚¹æ•° - äºŒåˆ†å›¾æœ€å¤§åŒ¹é…
 
-/* Ê÷ÉÏµÄÎÊÌâ
-	×î³¤Â·¾¶£º µã¼¯µÄÖ±¾¶ÓÃÆäÁ½¸ö¶ËµãÎ¬»¤£¬·½±ãÁ½¸öµã¼¯µÄºÏ²¢¡£
+/* æ ‘ä¸Šçš„é—®é¢˜
+	æœ€é•¿è·¯å¾„ï¼š ç‚¹é›†çš„ç›´å¾„ç”¨å…¶ä¸¤ä¸ªç«¯ç‚¹ç»´æŠ¤ï¼Œæ–¹ä¾¿ä¸¤ä¸ªç‚¹é›†çš„åˆå¹¶ã€‚
 
 */
