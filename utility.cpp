@@ -1,7 +1,14 @@
 #include<algorithm> // for sort()
 #include<vector>
 
-
+// 链式前向星
+struct Edge{
+	int v,next;
+}edges[maxn*2];
+int head[maxn],numOfE(0);
+void addEdge( int u, int v ){
+	edges[numOfE].v = v, edges[numOfE].next = head[u], head[u] = numOfE++;
+}
 
 // 离散化a:  1 1 1000 1000 -> 2 2 4 4
 int a[maxn];
@@ -62,6 +69,114 @@ void getSuffixArray(int n){
         height[rnk[i]] = j;
     }
 } 
+
+// SAM: suffix auto machine
+// 后缀自动机
+int NEXT_FREE_IDX = 0;
+int maxlen[2*maxn+10], minlen[2*maxn+10], trans[2*maxn+10][26], slink[2*maxn+10]; //每add一个字符最少增加1个，最多增加两个状态
+int edpts[2*maxn+10],indegree[2*maxn+10], containPrefix[2*maxn+10];
+int new_state( int _maxlen, int _minlen, int* _trans, int _slink){
+	// 新建一个结点，并进行必要的初始化。
+	maxlen[NEXT_FREE_IDX] = _maxlen;
+	minlen[NEXT_FREE_IDX] = _minlen;
+	for( int i(0); i < 26; i++ ){
+		if( _trans==NULL )
+			trans[NEXT_FREE_IDX][i] = -1;
+		else
+			trans[NEXT_FREE_IDX][i] = _trans[i];
+	}
+	slink[NEXT_FREE_IDX] = _slink;
+	return NEXT_FREE_IDX++;
+}
+void add_src(){ // 新建源点
+	maxlen[0] = minlen[0] = 0; slink[0] = -1;
+	for( int i(0); i<26; i++ ) trans[0][i] = -1;
+	NEXT_FREE_IDX = 1;
+}
+int add_char( char ch, int u ){ // 新插入的字符ch在位置i
+	int c = ch-'a';
+	int z = new_state( maxlen[u]+1,-1,NULL,-1); // 新的状态只包含一个结束位置i
+	containPrefix[z] = 1;
+	int v = u;
+	while( v!=-1 && trans[v][c]==-1 ){
+		// 对于suffix-link 上所有没有对应字符ch的转移
+		trans[v][c] = z;
+		v = slink[v]; // 沿着suffix-link往回走
+	}
+	if( v==-1 ){
+		// 最简单的情况，整条链上都没有对应ch的转移
+		minlen[z] = 1; // ch字符自身组成的子串
+		slink[z] = 0; indegree[0]++;
+		return z;
+	}
+	int x = trans[v][c];
+	if( maxlen[v]+1 == maxlen[x] ){
+		// 不用拆分状态x的情况: 从v到x有对应ch的状态转移，但v代表的所有结束位置的后一位置不一定都是ch，故{x代表的结束位置}只是{v代表的结束位置+1}一个子集
+		// x能代表更广泛（长度也就可以更长）的字符串，如果满足maxlen[v]+1 == maxlen[x],则v中的子串+ch就恰好与x中的子串一一对应
+		// 此时 x 代表的结束位置就是{原来x代表的结束位置,位置i}
+		minlen[z] = maxlen[x]+1;
+		slink[z] = x; indegree[x]++;
+		return z;
+	}
+	// 拆分x: x包含一连串连续的子串，将大于maxlen[y]+1的那些（仍然分配到x)和余下的(分配到y)分别拆分到x和y两个状态下
+	// 那些能够通过ch转移到原来的x状态的所有状态中，某些要重新指向y，因为suffix-link和状态机的性质，很容易实现。
+	// 同时 y 需要拷贝一份原来x状态的转移函数，见new_state();
+	int y = new_state(maxlen[v]+1, minlen[x]/*-1*/, trans[x], slink[x]);  
+	//slink[y] = slink[x]; // new_state中已赋值
+	minlen[x] = maxlen[y]+1; // = maxlen[v]+2 ; 拆分后，x包含的最短字符串和y包含的最长字符串需要更新
+	slink[x] = y;	indegree[y]++;
+	minlen[z] = maxlen[y]+1;
+	slink[z] = y;	indegree[y]++;
+	int w = v;
+	while( w!=-1 && trans[w][c]==x ){
+		trans[w][c] = y;
+		w = slink[w];
+	}
+	//minlen[y] = maxlen[slink[y]]+1; //y的最短不就是原来x的最短了？ new_state中赋值
+	return z;
+}	
+void getEndPtCount(){ // 计算每个状态的结束位置计数，根据SAM的性质进行拓扑序递推。
+	queue<int> q;
+	for( int i(1); i < NEXT_FREE_IDX; i++ )if( !indegree[i] ){
+		q.push(i);
+	}
+	while( !q.empty() ){
+		int u = q.front(); q.pop();
+		if( containPrefix[u] ) edpts[u]++; // 标记为绿色+1.
+		edpts[ slink[u]] += edpts[u];
+		if( !--indegree[slink[u]] ) q.push(slink[u]);
+	}
+}
+
+// 根据SAM计算字符串的相关问题
+// 计算模板串循环同构串在原串中出现的次数
+int vis[2*maxn+10];
+int calCyclicIsomorphism( char *T ){
+	// 先在调用该函数前构建原串的SAM
+    memset(vis,0,sizeof(vis));
+	int ans = 0; // int type is sufficient
+	int len;
+	int n = len = strlen(T); // length of T
+	for( int i(0); i < len-1; i++ ) T[len+i] = T[i]; // extended string of template, say T'
+	len += n-1 ; // length of T' 
+	int u = 0;
+	int l = 0;
+	for( int i(0); i < len; i++ ){
+		int c = T[i]-'a';
+		while( u!=0 && trans[u][c]==-1 ) // dp 从T[i-1]的(u,l)对计算T[i]的(u,l)对
+			u = slink[u], l = maxlen[u];
+		if( trans[u][c]!=-1 )
+			u = trans[u][c], l++;
+		else // u 已经是S(0)了并且没有转移。也就是说不存在P的子串是T'[0..i]的某个后缀
+			l = 0;
+		if( l > n ) // 找到串T'[i-l+1,...,i](实际就是T的某个循环子串)在SAM中的哪个状态。
+			while( maxlen[slink[u]] >= n )
+				u = slink[u], l = maxlen[u];
+		if( l >= n && !vis[u] ) // 每一个状态只包含一个长度为n的子串？只统计一次
+			vis[u] = 1, ans+=edpts[u];
+	}
+	return ans;
+}
 
 // KMP 匹配算法， 复杂度O(n), f 为失配函数
 void getFail( char* T, int* f){ // T 为模板串
@@ -136,6 +251,27 @@ struct AhoCorasickAutomata{
 		}
 	}
 };
+
+// 归并排序并统计逆序对
+LL mergeSort(int *A, int *buf, int l, int r ){
+	LL cnt(0);
+	if( l==r ) return cnt;
+	int mid = (l+r)/2;
+	cnt += mergeSort(A,buf,l,mid);
+	cnt += mergeSort(A,buf,mid+1,r);
+	int len1 = mid-l+1, len2 = r-mid;
+	int i = 0,j = 0;
+	while( i < len1 && j < len2 ){
+		if( A[l+i] > A[mid+1+j] )
+			buff[l+i+j] = A[mid+1+j++], cnt += ( len1-i );
+		else
+			buff[l+i+j] = A[l+i++];
+	}
+	while( i < len1 ) buff[l+i+j] = A[l+i++];
+	while( j < len2 ) buff[l+i+j] = A[mid+1+j++];
+	for( int i(l); i<=r; i++ ) A[i] = buff[i];
+	return cnt;
+}
 
 // 计算长度为n的所有子串组合，按字典序输出。 复杂度O(n!)
 // 例如 1234 的一个子串组合是： 3-124  其中字典序最小的一个是1-2-3-4,最大的一个是4-3-2-1.

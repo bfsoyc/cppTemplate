@@ -7,33 +7,31 @@ struct Edge{
 	Edge(){};
 	Edge( int iv, int iw ):v(iv),w(iw){};
 };
-int done[maxn*maxn],dist[maxn*maxn];
-vector<Edge> G[maxn*maxn];
+
+// 带优先队列优化的Dijktra 复杂度 m*logn, 常用于n很大的稀疏图
+typedef pair<int,int> pii;
+int done[maxn],dist[maxn];
 void Dijkstra(int st){
 	memset(done,0,sizeof(done));
 	memset(dist,-1,sizeof(dist));
 	priority_queue<pii,vector<pii>,greater<pii> >q;//不用greater时省略，默认为大根堆 q.push(make_pair(dist[a],a));/起始点加入队列 
 	q.push( pii(0,st) );
 	dist[st] = 0;
-	while(!q.empty()) 
-	{ 
-		pii u= q.top();q.pop(); 
-		int x=u.second;//x获得u对应的结点编号 
-		if(done[x]) continue;	
-		//Dijkstra对每个结点只做一次，所以不用担心下面将某一结点重复加入队列 
-		done[x]=1; 
-		int j=G[x].size();//G是用vector做的链表 
-		int t ,v; 
-		for(int i=0;i<j;i++){ 
-			v=G[x][i].v; 
-			t=dist[x]+G[x][i].w; 
-			//if(t<=600)//带深度限制，这里是600 
-			if(dist[v]<0||dist[v]>t){ //这里将dist初始化为-1替代了INF 
-				dist[v]=t;
-				q.push(make_pair(dist[v],v)); 
-			} 
-		} 
-	} 
+	while(!q.empty()){ 
+		pii top = q.top();q.pop(); 
+		int u = top.second;			//获得对应的结点编号 
+		if(done[u]) continue;		//已经求出最短路的结点不会重复加入队列 		
+		done[u] = 1; 
+		for( int h = head[u]; h!=-1; h=edges[h].next ){
+			int t = dist[u]+edges[h].w;
+			int& v = edges[h].v;
+			//if(t<=600)//带深度限制
+			if( dist[v]<0 || dist[v]>t ){ // 用-1替代INF
+				dist[v] = t;
+				q.push( make_pair(dist[v],v) );
+			}
+		}
+	}
 }
 
 //最小生成树 prim 算法，连通图上的所有 N 个点，并且使得连接的线段的总长最短，
@@ -385,9 +383,29 @@ struct TwoSAT{
 	} 
 }; 
 
+// 拓扑排序
+// Topological sorting : O(m) m is the number of edges
+int indegree[maxn],rk[maxn],used[maxn],sz;
+void topo(int r){ 
+	// starting at r which must be with indegree of 0
+	// there must be a outer loop runs topo(i) through all i
+	queue<int> q;	q.push(r);
+	while( !q.empty() ){
+		int u = q.front(); q.pop();
+		rk[sz++] = u; used[u] = 1;
+		for( int h = head[u]; h!=-1; h = edges[h].next ){
+			int v = edges[h].v;
+			if( --indegree[v] == 0 && !used[v] ) q.push( v );
+			// addtional code here for your specific purpose
+			cnt[v] += cnt[u];
+			cnt[v] %= MOD;
+		}
+	}
+}
+
 // 二分图判断并且标记 color[i] == 1 或 2分别表示两个子图
 int color[maxn];
-bool solve( int n){
+bool getBipartiteGraph( int n){ // 每次调用前color需要初始化
 	for( int i(1); i <= n ; i++ )if( !color[i] ){
 		color[i] = 1;
 		queue<int> q; q.push(i);
@@ -433,6 +451,11 @@ bool hungery(int u){ // mat初始化1次， used在每次调用hungery前（不�
 //		直观的理解是，最大匹配下，任何边都被覆盖了，而且去掉任何一个匹配都导致未被覆盖的边
 // 2. 最大独立集的点数(选出一个最大子集，使得子集内的点都无边） = 总点数 - 二分图最大匹配
 
+
+/*
+	最短路的问题中，有一类顶点数很大，同时直接的边数为O(n*n),如果能做转化，将边的数目控制在O(n)
+	那么就可以使用优先队列的dijkstra算法了
+*/
 /* 树上的问题
 	最长路径： 点集的直径用其两个端点维护，方便两个点集的合并。
 

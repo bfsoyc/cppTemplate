@@ -20,7 +20,7 @@ typedef long long LL;
 const double PI = acos( -1.0 );
 
 LL fermat( LL a, LL d ){
-	LL ans = 1;
+	LL ans = 1; // d = k_0*2^0+k_1*2^1+...+k_p*2^p; k_i为0或1下面d&1就是判断k_i的值
 	while(d){
 		if( d&1 ) ans = ans*a%e;
 		a = a * a % e;
@@ -58,18 +58,21 @@ vector<LL> matrixPower( vector<LL>& p, LL d ){ //递归写法
 	}
 }
 
-vector<int> primeList,Phi( R+1, 0 );	//Phi[i] 小于i并且与i互质的正整数的个数
-vector<bool> isPrime( R+1, true );
+int primeList[R+1],primeNum; 
+int Phi[R+1]; //Phi[i] 小于i并且与i互质的正整数的个数
+bool isPrime[R+1]; // -1 表示true
 void getPrimes( int R){  // O(n)复杂度获取小于等于R的素数（可计算欧拉函数Phi）
+	primeNum = 0;
+	memset(isPrime,-1,sizeof(isPrime));
 	for( int i(2) ; i <= R ; i++ ){  // 枚举i=M 任意合数S = M*p p为S的最小质因数，M的最小质因素必然>=p,下面有分类谈论。
 		if( isPrime[i] ){
-			primeList.push_back( i );
+			primeList[primeNum++] = i;
 			//Phi[i] = i-1;	// phi(i) = i-1 if i is prime
 		}
-		for( int j(0) ; j < primeList.size() ; j++ ){			
+		for( int j(0) ; j < primeNum ; j++ ){			
 			int k = i*primeList[j] ;
 			if( k > R )	break;
-			isPrime[k] = false;			
+			isPrime[k] = 0;			
 			//if( !(i % primeList[j] ) ){		// Phi(i*j) = j * Phi(i) if j is prime factor of i 
 			//	Phi[k] = Phi[i] * primeList[j];
 			//	break;
@@ -308,3 +311,6 @@ int main(){
 	
     return 0;
 }
+
+// 一阶的递推公式 f[n] = f[n-1]+f[n-2]（斐波那契) 可以写成矩阵的形式
+// (f[n], f[n-1])' = { 1, 1; 1, 0 } * (f[n-1], f[n-2])'; 然后用快速幂算法。
