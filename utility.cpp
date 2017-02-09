@@ -149,7 +149,7 @@ void getEndPtCount(){ // 计算每个状态的结束位置计数，根据SAM的�
 }
 
 // 根据SAM计算字符串的相关问题
-// 计算模板串循环同构串在原串中出现的次数
+// 1.计算模板串循环同构串在原串中出现的次数
 int vis[2*maxn+10];
 int calCyclicIsomorphism( char *T ){
 	// 先在调用该函数前构建原串的SAM
@@ -177,6 +177,77 @@ int calCyclicIsomorphism( char *T ){
 	}
 	return ans;
 }
+
+// 2.计算数字串中不同子串的和
+// 多个串的处理是将所有串连在一起并且用特殊符号连接(例如:)
+// 构建SAM的函数 new_state 和 add_char 略做修改以计算indegree
+int indegree[2*maxn+10],valid_s[2*maxn+10];
+LL sum[2*maxn+10];
+int new_state( int _maxlen, int _minlen, int* _trans, int _slink){
+	maxlen[NEXT_FREE_IDX] = _maxlen;
+	minlen[NEXT_FREE_IDX] = _minlen;
+	for( int i(0); i < 26; i++ ){
+		if( _trans==NULL )
+			trans[NEXT_FREE_IDX][i] = -1;
+		else{
+			trans[NEXT_FREE_IDX][i] = _trans[i];
+			if( _trans[i]!=-1 ) indegree[_trans[i]]++;
+		}
+	}
+	slink[NEXT_FREE_IDX] = _slink;
+	return NEXT_FREE_IDX++;
+}
+int add_char( char ch, int u ){ // 新插入的字符ch在位置i
+	int c = ch-'0'; // 改为'0'
+	int z = new_state( maxlen[u]+1,-1,NULL,-1); // 新的状态只包含一个结束位置i
+	int v = u;
+	while( v!=-1 && trans[v][c]==-1 ){
+		trans[v][c] = z; indegree[z]++;
+		v = slink[v]; // 沿着suffix-link往回走
+	}
+	if( v==-1 ){
+		minlen[z] = 1; // ch字符自身组成的子串
+		slink[z] = 0;
+		return z;
+	}
+	int x = trans[v][c];
+	if( maxlen[v]+1 == maxlen[x] ){
+		minlen[z] = maxlen[x]+1;
+		slink[z] = x;
+		return z;
+	}
+	int y = new_state(maxlen[v]+1, minlen[x], trans[x], slink[x]);  
+	minlen[x] = maxlen[y]+1; 
+	slink[x] = y;
+	minlen[z] = maxlen[y]+1;
+	slink[z] = y;
+	int w = v;
+	while( w!=-1 && trans[w][c]==x ){
+		trans[w][c] = y; 
+		indegree[x]--, indegree[y]++;
+		w = slink[w];
+	}
+	return z;
+}	
+int substrSum(){ // 根据拓扑序递推不同子串的和。
+	queue<int> q;
+	q.push(0); valid_s[0] = 1;
+	LL ret(0);
+	while( !q.empty() ){
+		int u = q.front(); q.pop();
+		ret += sum[u];	ret %= MOD;
+		for( int i(0); i < 26; i ++ ){
+			int v = trans[u][i];
+			if( v!=-1 && i < 10){
+				sum[v] += sum[u]*10+i*valid_s[u],	sum[v] %= MOD;
+				valid_s[v] += valid_s[u];
+			}
+			if( !--indegree[v] ) q.push(v);
+		}		
+	}
+	return (int)ret;
+}
+
 
 // KMP 匹配算法， 复杂度O(n), f 为失配函数
 void getFail( char* T, int* f){ // T 为模板串
