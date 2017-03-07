@@ -339,49 +339,56 @@ int find(int x){return root[x]==x?x:root[x]=find(root[x]);}
 
 // 2-sat(2-satisfiability)
 // 该类问题抽象为：有一系列布尔型变量X={x1,x2,...,xi},其中某些变量对存在约束关系如xi!=xj为真，问是否存在满足约束的合法解。
-struct TwoSAT{ 
-	int n; 
-	vector<int> G[maxn*2]; 
-	bool mark[maxn*2]; 
-	int S[maxn*2],c; //记录一条dfs进行的路径，用于回溯
- 
-	bool dfs( int x ){ 
-	if( mark[x^1] ) return false;//  根据构建的边推导，出现矛盾则返回false 
-	if( mark[x] ) return true;  //  算是剪枝 
-		mark[x] = true; 
-		S[c++] = x; 
-		for( int i = 0 ;   i < G[x].size(); i++ )if( !dfs( G[x][i] ) ) return false; 
-   
-		return true;  
-	} 
- 
-	void init( int n ){ // 0-based
-		this->n = n; 
-		for( int i = 0 ; i < n*2 ; i++ ) G[i].clear(); 
-		memset( mark,0,sizeof( mark ) );//   
-	} 
- 
+struct TwoSAT {
+	int n;
+	vector<int> G[maxn * 2];
+	bool mark[maxn * 2];
+	int S[maxn * 2], c; //记录一条dfs进行的路径，用于回溯
+
+	bool dfs(int x) {
+		if (mark[x ^ 1]) return false;//  根据构建的边推导，出现矛盾则返回false 
+		if (mark[x]) return true;  //  算是剪枝 
+		mark[x] = true;
+		S[c++] = x;
+		for (int i = 0; i < G[x].size(); i++)if (!dfs(G[x][i])) return false;
+
+		return true;
+	}
+
+	void init(int n) { // 0-based
+		this->n = n;
+		for (int i = 0; i < n * 2; i++) G[i].clear();
+		memset(mark, 0, sizeof(mark));//   
+	}
+
 	//  增加条件 ( x==xval or y==yval) == true 
 	//  xval,yval 为 0（定义为真）或 1 
 	//  若果x不等于y (x = !y),  则相当于增加两个条件( x==0 or y==0)==true 和 ( x==1 or y==1 )==true 
-	void add_clause( int x, int xval, int y, int yval ){ 
-		x = x*2 + xval; // 每个结点x拆分为两个结点 x*2 与 x*2+1
-		y = y*2 + yval; 
-		G[x^1].push_back( y ); 
-		G[y^1].push_back( x ); 
-	} 
- 
-	bool solve(){ 
-		for( int i = 0 ; i < n*2 ; i+= 2 )if( !mark[i] && !mark[i+1] ){ 
-			c = 0; 
-			if( !dfs(i) ){ 
-				while( c > 0 ) mark[S[--c]] = false; 
-				if( !dfs(i+1) ) return false; 
-			} 
-		} 
-		return true; 
-	} 
-}; 
+	void add_clause(int x, int xval, int y, int yval) {
+		x = x * 2 + xval; // 每个结点x拆分为两个结点 x*2 与 x*2+1
+		y = y * 2 + yval;
+		G[x ^ 1].push_back(y);
+		G[y ^ 1].push_back(x);
+	}
+	// 增加条件（ x==xval and y==yval ) == false
+	void add_clause2(int x, int xval, int y, int yval) {
+		x = x * 2 + xval;
+		y = y * 2 + yval;
+		G[x].push_back(y ^ 1);
+		G[y].push_back(x ^ 1);
+	}
+
+	bool solve() {
+		for (int i = 0; i < n * 2; i += 2)if (!mark[i] && !mark[i + 1]) {
+			c = 0;
+			if (!dfs(i)) {
+				while (c > 0) mark[S[--c]] = false;
+				if (!dfs(i + 1)) return false;
+			}
+		}
+		return true;
+	}
+};
 
 // 拓扑排序
 // Topological sorting : O(m) m is the number of edges
@@ -445,6 +452,77 @@ bool hungery(int u){ // mat初始化1次， used在每次调用hungery前（不�
 	} 
 	return false; 
 } 
+
+// dominator tree 构建支配树 O((n+m)*a(n))
+vector<int>  g[maxn], rg[maxn];// g: original graph, rg: corresponding reverse graph with node index of dfs-search graph
+int arr[maxn], rev[maxn], par[maxn];
+// arr: map of node from original graph to dfs-search graph, rev: corresponding reverse graph
+// par: parent node in the dfs-search graph
+int sdom[maxn], label[maxn], rt[maxn];
+vector<int> bucket[maxn];
+// sdom: simi-dominator,  bucket: inverse map of sdom
+// rt(used in disjoint set problem to maintian forest): root node of the corresponding set(forest) 
+int idom[maxn]; // idom: immediate dominator, no need to initia
+
+int NEXT_IDX;
+// construct the dfs-search spanning tree and initialize some array
+void dfs(int u) {
+	// initialize the array arr with -1, and rg must be empty
+	int& T = NEXT_IDX;
+	arr[u] = T, rev[T] = u;
+	sdom[T] = T, bucket[T].clear(); label[T] = T, rt[T] = T;
+	T++;
+	vector<int>& v = g[u];
+	for (int i(0); i < v.size(); i++) {
+		if (arr[v[i]] == -1) {
+			dfs(v[i]);
+			par[arr[v[i]]] = arr[u];
+		}
+		rg[arr[v[i]]].push_back(arr[u]);
+	}
+}
+
+int find(int u, int x = 0) { 
+	// 事实上为两个函数， 当x=1，返回u所在森林当前u到根节点的路径中最接近根结点的节点，并在搜索过程中压缩路径以及更新label
+	// 当 x = 0， 返回lable[u]
+	if (u == rt[u]) return x ? -1 : u;
+	int v = find(rt[u], x + 1);
+	if (v < 0) return u; // ?
+	if (sdom[label[rt[u]]] < sdom[label[u]])
+		label[u] = label[rt[u]];
+	rt[u] = v;	// 路径压缩
+	return x ? v : label[u];
+};
+
+vector<int> tree[maxn]; // store the answer
+void getDominatorTree(int s) {
+	memset(arr, -1, sizeof(arr));
+	dfs(s);
+	// core of the algorithm: calculate the sdom and part of idom
+	int n = NEXT_IDX;
+	for (int i = n - 1; i >= 0; i--) { // 逆dfs序遍历
+		for (int j = 0; j < rg[i].size(); j++)
+			// 计算sdom[i]:考虑所有i的前驱所在子集（指维护的并查集）
+			sdom[i] = min(sdom[i], sdom[find(rg[i][j])]);
+		bucket[sdom[i]].push_back(i);
+		for (int j = 0; j < bucket[i].size(); j++) {
+			// 此时可以保证的是i 到 (循环里所有的）w 之间的节点都已经处理过了
+			int w = bucket[i][j], v = find(w);
+			if (sdom[v] == sdom[w]) idom[w] = sdom[w]; // sdom[v] 永远大于等于sdom[w]
+			else idom[w] = v; // idom[w] = idom[v],由于idom[v]可能还未计算出来，此处先做标记
+		}
+		if (i) { // union node i and its parent node
+			rt[i] = par[i];
+		}
+	}
+	// calculate the rest of idom
+	for (int i(1); i < n; i++) {
+		if (idom[i] != sdom[i]) idom[i] = idom[idom[i]];
+		tree[rev[i]].push_back(rev[idom[i]]); // 反向边
+		tree[rev[idom[i]]].push_back(rev[i]); // 正向边
+	}
+}
+
 
 // 二分图的匹配问题
 // 1. 最小点覆盖的点数(用最少的点覆盖所有的边) = 二分图最大匹配（匹配对的数目）

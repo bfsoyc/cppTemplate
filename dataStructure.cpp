@@ -295,8 +295,8 @@ struct QuadTree{
 
 // 树状数组(二叉索引树)
 #define lowbit(x) (x&-x)
-LL C[maxn],sz; // 辅助数组C初始化为0，n次add操作将需要维护的数组录入。 由于C存放的是前缀和，注意溢出
-LL sum( int x ){ // 查询 A[1]...A[x]的和
+LL C[maxn],sz; // 辅助数组C初始化为0，n次add操作将需要维护的数组录入。 由于C存放的是前缀和，注意溢出。 ！！sz要初始化
+LL sum( int x ){ // 查询 A[1]...A[x]的和,默认1-based的数组（若为0-based，先做一次位移)
 	LL ret = 0;
 	while( x > 0 ){
 		ret += C[x]; 

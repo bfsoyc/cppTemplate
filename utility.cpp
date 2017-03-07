@@ -10,7 +10,7 @@ void addEdge( int u, int v ){
 	edges[numOfE].v = v, edges[numOfE].next = head[u], head[u] = numOfE++;
 }
 
-// 离散化a:  1 1 1000 1000 -> 2 2 4 4
+// 离散化a:  1 1 1000 1000 -> 1 1 3 3
 int a[maxn];
 bool cmp( int x, int y ){
 	return a[x] < a[y];
@@ -28,7 +28,7 @@ void discretization(int n){
 
 // 计算后缀数组 O(nlogn)
 int cntA[maxn],cntB[maxn],rnk[maxn],A[maxn],B[maxn],tsa[maxn]; // 基数排序辅助数组
-int ch[maxn],height[maxn],sa[maxn]; // ch:将字符数组转化后得到的字符数组， sa:排序后的后缀数组， height[i]: sa[i]与sa[i-1]所代表的后缀的最长公共前缀
+int ch[maxn],height[maxn],sa[maxn]; // ch:将字符数组(一般为0-based)转化后得到的数字数组（1-based)， sa:排序后的后缀数组， height[i]: sa[i]与sa[i-1]所代表的后缀的最长公共前缀
 const int maxC = 1026;
 void getSuffixArray(int n){
 	// 一定注意初始化 ch
