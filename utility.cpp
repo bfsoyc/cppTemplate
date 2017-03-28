@@ -387,6 +387,58 @@ void comb( int n){
 	}
 }
 
+// Mo's algorithm: a general framework to deal with a bunch of offline queries in O(N*sqrt(N)).
+// partition the entire interval into sqrt(N) blocks, of which the size is sqrt(N)
+// group each query according by the belonging block of the start position of its corresponding interval.
+// compute the result of each query group by group in sorted order. Note that the query in each group should also be in sorted order.
+const int sqrtN = 200;
+int block[maxn], QUERY_COUNT;	// block[i]: the index of block query(i,j) belongs to. 
+pair<int, int> qry[maxn];	// queries
+void addQuery(int l, int r) {
+	block[QUERY_COUNT] = l / sqrtN;
+	qry[QUERY_COUNT] = pair<int, int>(l, r);	QUERY_COUNT++;
+}
+bool cmp(int a, int b) {
+	if (block[a] == block[b]) return qry[a].second < qry[b].second;
+	return block[a] < block[b];
+}
+LL ans[maxn], val;
+int ID[maxn], A[maxn], l, r;
+void movePtr(int ptr, int d) {	//
+	if (d == 1) {	// add A[ptr]		
+		val += sum(A[ptr] - 1, C) + A[ptr];
+		add(A[ptr], A[ptr], C);
+		val += 1LL * (sum(maxn - 1, D) - sum(A[ptr] - 1, D)) * A[ptr];
+		add(A[ptr], 1, D);
+	}
+	else {	// remove A[ptr]
+		val -= sum(A[ptr] - 1, C) + A[ptr];
+		add(A[ptr], -A[ptr], C);
+		add(A[ptr], -1, D);
+		val -= 1LL * (sum(maxn - 1, D) - sum(A[ptr] - 1, D)) * A[ptr];
+	}
+};
+void solve() {
+	//for BIT
+	sz = maxn - 1;
+	memset(C, 0, sizeof(C));
+	memset(D, 0, sizeof(D));
+
+	for (int i(0); i < QUERY_COUNT; i++)	ID[i] = i;
+	sort(ID, ID + QUERY_COUNT, cmp);	// sort queries
+	l = 1, r = 0, val = 0;
+	for (int i(0); i < QUERY_COUNT; i++) {
+		int id = ID[i];
+		// adjust the left and right pionter 
+		while (l < qry[id].first) movePtr(l++, -1);
+		// 中间过程可能会出现 l > r 的时刻，你要保证的是增删操作满足交换律，先增后删和先删后增是一样的
+		while (l > qry[id].first) movePtr(--l, +1);
+		while (r < qry[id].second) movePtr(++r, 1);
+		while (r > qry[id].second) movePtr(r--, -1);
+		ans[id] = val;
+	}
+}
+
 
 // 在关于字符串的子串问题中，经常用到后缀数组，通常可以转化到height与sa数组上的搜索问题，二分或者维护单调队列
 // 值得特别小心的有两点：1上述模板的代码实现中height与sa是以下标1开始的，用其他数据结构存储时注意边界

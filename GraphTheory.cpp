@@ -523,6 +523,69 @@ void getDominatorTree(int s) {
 	}
 }
 
+// 树的点分治
+int rt, sz[maxn], used[maxn], mx[maxn]; // used 记录节点是否已经选取过为树根,这些已经做分治重心的节点将树分割为不联通的多个部分。
+void getCentroid(int u, int fa, int n) { // 获取分治重心，树的点数n用于简化计算
+	mx[u] = 0, sz[u] = 1;
+	for (int h(head[u]); h != -1; h = edges[h].next) {
+		int v = edges[h].v;
+		if (v == fa || used[v])	continue;
+		getCentroid(v, u, n);
+		sz[u] += sz[v];
+		mx[u] = max(mx[u], sz[v]);
+	}
+	mx[u] = max(mx[u], n - sz[u]);
+	if (rt == -1 || mx[u] < mx[rt]) rt = u;
+}
+// divide and conquer
+vector<int> nodeList;
+map<int, int> maxWeightwithDist;
+int d[maxn];
+int better(int pid, int id) {
+	if (val[pid] <= val[id]) {
+		if (val[pid] < val[id] || id < pid) return id;
+	}
+	return pid;
+}
+void dfs(int u, int fa, int sum) {
+	sz[u] = 1; // 重新算sz
+	d[u] = sum; nodeList.push_back(u);
+	maxWeightwithDist[sum] = better(maxWeightwithDist[sum], u);
+	for (int h(head[u]); h != -1; h = edges[h].next) {
+		int v = edges[h].v;
+		if (v == fa || used[v]) continue;
+		dfs(v, u, sum + edges[h].w);	sz[u] += sz[v];
+	}
+}
+void DC(int u, int n) { // 每次选取重心，将树划分为多个部分，每个部分size不超过原树的一半
+	rt = -1;	getCentroid(u, -1, n);
+	// 线性遍历该子树的n个节点（一般用dfs)，解决原问题中与跨越根结点相关的子问题。
+	nodeList.clear();	maxWeightwithDist.clear();
+	dfs(rt, -1, 0);	// 一般从重心开始，而不是u
+					// 要2分查找，先变前缀和
+	auto itr1 = maxWeightwithDist.begin(), itr2 = itr1;
+	itr2++;
+	while (itr2 != maxWeightwithDist.end()) {
+		itr2->second = better(itr2->second, itr1->second);
+		itr1++, itr2++;
+	}
+
+	for (int i(0); i < nodeList.size(); i++) {
+		// 对于该子树内的节点u， 有查询(u, r)， 并且u到根节点的距离为d[u], 那么用 d[v] <= r-d[u] 的节点中权值最大的更新结果
+		int p = nodeList[i];
+		for (int j(0); j < qry[p].size(); j++) { // 每个查询在DC()内出现一次，更新需要logn，DC()递归层数不超过logn,总复杂度不超过nlog^2(n)
+			int r = qry[p][j] - d[p]; if (r < 0) continue;
+			auto itr = maxWeightwithDist.upper_bound(r);	if (itr != maxWeightwithDist.begin()) itr--;
+			ans[ansID[p][j]] = better(ans[ansID[p][j]], itr->second);
+		}
+	}
+	used[rt] = 1;
+	for (int h(head[rt]); h != -1; h = edges[h].next) { // 注意是rt才是分治点
+		int v = edges[h].v;
+		if (used[v]) continue;
+		DC(v, sz[v]);	// 在dfs()里 sz被重新计算了。
+	}
+}
 
 // 二分图的匹配问题
 // 1. 最小点覆盖的点数(用最少的点覆盖所有的边) = 二分图最大匹配（匹配对的数目）
