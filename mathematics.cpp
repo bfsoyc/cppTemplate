@@ -240,7 +240,7 @@ struct complex
 };
 // DFT ( naive recursive )
 // X(k) = F1(k) + W(k,N)F2(k);  both F1 and F2 are of period of N/2 
-// the inverse matrix of W is 1/N of the conjugate matrix of W ?
+// the inverse matrix of W is 1/N of the conjugate matrix of W ?( yes, the different colume in W is "perpendicular" to each other)
 vector<complex> DFT( vector<complex> x , int type = 1){
 	int N = x.size();
 	int hN = N/2;
@@ -267,8 +267,7 @@ vector<complex> DFT( vector<complex> x , int type = 1){
 }
 // 我们希望把奇数下标的数放到前半段，偶数下标的放到后半段，再对这两个半段递归处理
 // 然而这样处理无疑会多操作很多次，下面参考网上的模板，未参透
-void change(complex *y,int len)
-{
+void change(complex *y,int len){
     int i,j,k;
     for(i = 1, j = len/2;i < len-1; i++){
         if(i < j)swap(y[i],y[j]); //交换互为小标反转的元素，i<j保证交换一次 
@@ -282,7 +281,7 @@ void change(complex *y,int len)
     }
 }
 // 值得注意的是，如果卷积结果出现很大的数，可能有较大的精度误差，但是相对值的大小的不变的
-// 傅里叶变换对 x[n](*)y[n] <-> X(k)*Y(k)   (*)表示圆周卷积：注意对y序列有一个反转操作。
+// 傅里叶变换对 x[n](*)y[n] <-> X(k)*Y(k)   (*)表示圆周卷积：注意对y序列有一个反转操作(0位置不变)。
 void DFT( complex *x, int L, int type = 1 ){
 	change( x, L );
 	for( int N = 2; N <= L ; N = N << 1 ){ // 从较短的长度递推较长的长度
@@ -292,7 +291,7 @@ void DFT( complex *x, int L, int type = 1 ){
 			for( int j = i; j < i+N/2; j++ ){
 				complex u = x[j], t = x[j+N/2];
 				x[j] = u+w*t;
-				x[j+N/2] = u-w*t;
+				x[j+N/2] = u-w*t; // property
 				w = w*wn;
 			}
 		}
@@ -300,17 +299,58 @@ void DFT( complex *x, int L, int type = 1 ){
 	if( type==-1 )
 		for( int i(0);  i < L; i++ ) 
 			// 为什么最后才除? 看上递归部分代码 
-			// 而且仅仅考虑实部（原序列一定为实数？）。
+			// 而且仅仅考虑实部（原序列一定为实数？事实上作为题目的输入，一般还是整数）。
 			x[i].r /= L;
 }
 
 
-int main(){
-    freopen("in.txt","r",stdin);
-    freopen("out.txt","w",stdout);
-	
-    return 0;
+// NTT: Number Theoretic Transforms 
+// 定理如是说：	P是模数， omiga是模P意义下的（P-1）次单位原根， 那么对于n，如果n能整除(P-1)，即有: P = ksi*n + 1,
+// 那么模P意义下的n次单位原根存在,等于 omiga^ksi =  omiga^((P-1)/n );
+// NTT中我们要做多次 n 点数论变换， n 为 2的幂， 故一个能写成 alpha * 2^t + 1 形式的素数能够帮助我们快速找到计算过程所有需要的原根
+// const LL P = 1945555039024054273LL; // 27 * (2 ^ 56), 1e18, g = 5  
+const LL MOD = 50000000001507329LL; //190734863287 * 2 ^ 18 + 1, g = 3 
+const int omiga = 3;
+LL wn[20]; // wn[i]: 模P意义下的2^i次单位原根
+void getWn() {
+	for (int i = 1; i < 20; ++i) {
+		int t = 1 << i;
+		wn[i] = fastPowerMOD(omiga, (MOD - 1) / t, MOD);
+	}
+}
+LL mul(LL x, LL y) {	// compute x*y % MOD in case x*y overflow
+	return (x * y - (LL)(x / (long double)MOD * y + 1e-3) * MOD + MOD) % MOD;
+}
+void NTT(LL *x, int L, int type = 1) {
+	change(x, L);	// change( LL*, int ）;
+	getWn();
+	int id(0);
+	for (int N = 2; N <= L; N = N << 1) { // 从较短的长度递推较长的长度
+		++id;
+		for (int i = 0; i < L; i += N) { // 计算长度为N的各个block
+			LL w = 1;
+			for (int j = i; j < i + N / 2; j++) {
+				LL u = x[j], t = x[j + N / 2];
+				x[j] = u + mul(w, t);	// ensure u and the return value of mul() is less than MOD 
+				if (x[j] > MOD) x[j] -= MOD;
+				x[j + N / 2] = u - mul(w, t) + MOD;
+				if (x[j + N / 2] > MOD) x[j + N / 2] -= MOD;
+				w = mul(w, wn[id]);
+			}
+		}
+	}
+	if (type == -1) {
+		for (int i(1); i < L / 2; i++) swap(x[i], x[L - i]);	// 与上一份DFT模板不同的是，只在这里区分正逆变换
+		LL inv = invPivot(L);	// 计算长度L模MOD意义下的逆元
+		for (int i(0); i < L; i++)
+			x[i] = mul(x[i], inv);
+	}
 }
 
+// 计算长度为n的两个序列a,b的循环卷积， 在序列末尾补0到长度为L=2^t， 满足L>2*n。
+// 得到序列a',b'， 并且对b'进行翻转操作得到新的b'
+// 原序列的循环卷积为:	c[k] = sumation{ a[i]*b[(i+k)%n] } k = 0,1,...,n-1
+// a',b'的通过快速傅里叶变换得到的结果是 c'： 有c[k] = c'[k]+c'[L-n+k];
+//
 // 一阶的递推公式 f[n] = f[n-1]+f[n-2]（斐波那契) 可以写成矩阵的形式
 // (f[n], f[n-1])' = { 1, 1; 1, 0 } * (f[n-1], f[n-2])'; 然后用快速幂算法。
