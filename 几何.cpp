@@ -113,3 +113,13 @@ int getCircleCircleIntersection( Circle C1, Circle C2, vector<Point>& sol, vecto
 	// C1上从p1到p2的一段弧在C2内
 	return 2;
 }
+
+// 判断线段交
+bool SegmentProperIntersection(Point a1, Point a2, Point b1, Point b2) {
+	double c1 = Cross(a2 - a1, b1 - a1), c2 = Cross(a2 - a1, b2 - a1),
+		c3 = Cross(b2 - b1, a1 - b1), c4 = Cross(b2 - b1, a2 - b1);
+	return dcmp(c1)*dcmp(c2) < 0 && dcmp(c3)*dcmp(c4) < 0;
+}
+bool OnSegment(Point p, Point a1, Point a2) {
+	return dcmp(Cross(a1 - p, a2 - p)) == 0 && dcmp(Dot(a1 - p, a2 - p)) < 0;
+}

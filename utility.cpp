@@ -28,6 +28,21 @@ void discretization(int n, int *A) {
 	}
 }
 
+// 三分法求最小值
+LL L = 0, R = 50;
+while (L + 1 < R) {
+	LL len = (R - L + 1) / 3;
+	LL mid1 = L + len, mid2 = mid1 + len;
+	if (f(mid1)>f(mid2)) { // f(mid1) < f(mid2)
+		L = mid1;
+	}
+	else {
+		if (R == mid2) R--;	// 对与长度为3的区间 mid2 == R
+		else R = mid2;
+	}
+}
+f(L), f(R);// 额外判断 L 与 R
+
 // 计算后缀数组 O(nlogn)
 int cntA[maxn],cntB[maxn],rnk[maxn],A[maxn],B[maxn],tsa[maxn]; // 基数排序辅助数组
 int ch[maxn],height[maxn],sa[maxn]; // ch:将字符数组(一般为0-based)转化后得到的数字数组（1-based)， sa:排序后的后缀数组， height[i]: sa[i]与sa[i-1]所代表的后缀的最长公共前缀
@@ -326,23 +341,23 @@ struct AhoCorasickAutomata{
 };
 
 // 归并排序并统计逆序对
-LL mergeSort(int *A, int *buf, int l, int r ){
+LL mergeSort(int *A, int *buf, int l, int r) {
 	LL cnt(0);
-	if( l==r ) return cnt;
-	int mid = (l+r)/2;
-	cnt += mergeSort(A,buf,l,mid);
-	cnt += mergeSort(A,buf,mid+1,r);
-	int len1 = mid-l+1, len2 = r-mid;
-	int i = 0,j = 0;
-	while( i < len1 && j < len2 ){
-		if( A[l+i] > A[mid+1+j] )
-			buff[l+i+j] = A[mid+1+j++], cnt += ( len1-i );
+	if (l == r) return cnt;
+	int mid = (l + r) / 2;
+	cnt += mergeSort(A, buf, l, mid);
+	cnt += mergeSort(A, buf, mid + 1, r);
+	int len1 = mid - l + 1, len2 = r - mid;
+	int i = 0, j = 0;
+	while (i < len1 && j < len2) {
+		if (A[l + i] > A[mid + 1 + j])
+			buf[l + i + j] = A[mid + 1 + j++], cnt += (len1 - i);
 		else
-			buff[l+i+j] = A[l+i++];
+			buf[l + i + j] = A[l + i++];
 	}
-	while( i < len1 ) buff[l+i+j] = A[l+i++];
-	while( j < len2 ) buff[l+i+j] = A[mid+1+j++];
-	for( int i(l); i<=r; i++ ) A[i] = buff[i];
+	while (i < len1) buf[l + i + j] = A[l + i++];
+	while (j < len2) buf[l + i + j] = A[mid + 1 + j++];
+	for (int i(l); i <= r; i++) A[i] = buf[i];
 	return cnt;
 }
 
@@ -441,6 +456,10 @@ void solve() {
 	}
 }
 
+// bit set某些时候可以优化运算（集合取并或交）
+// bitset<size> bs;
+// bs.set() 全置位；	bs.reset() 全复位
+// bs[i] = ture;	第i位置位
 
 // 在关于字符串的子串问题中，经常用到后缀数组，通常可以转化到height与sa数组上的搜索问题，二分或者维护单调队列
 // 值得特别小心的有两点：1上述模板的代码实现中height与sa是以下标1开始的，用其他数据结构存储时注意边界

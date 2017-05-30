@@ -213,6 +213,18 @@ LL gcd( LL a, LL b ){
 	return a%b==0 ? b: gcd(b,a%b);
 }
 
+// 拓展欧几里得，得出 ax+by=gcd(a,b) 的一组解，（确保a，b>0，否则欧几里得算出的gcd可能为负数）
+// 拓展到系解，很多时候需要最小整数解 x = x' + u*(b/d)， y = x' - u*(a/d), d= gcd(a,b)
+// 若 c = t*gcd(a,b) 那么解系可以表示为 x = x'*t + u*(b/d)
+// c++一般的编译器计算得到的余数r 是使得 m*k 与y的差不超过m的绝度值的最大的k下取得的r
+void gcd(long long a, long long b, long long& d, long long& x, long long& y) {
+	if (!b) { d = a, x = 1, y = 0; }
+	else {
+		gcd(b, a%b, d, y, x);
+		y -= x*(a / b);
+	}
+}
+
 void num2bin( int num , int bit, char* s){ // 10进制数num转化为bit位二进制表示的字符串
 	s[bit] = '\0';
 	int i = bit-1;
