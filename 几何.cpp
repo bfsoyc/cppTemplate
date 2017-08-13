@@ -123,3 +123,43 @@ bool SegmentProperIntersection(Point a1, Point a2, Point b1, Point b2) {
 bool OnSegment(Point p, Point a1, Point a2) {
 	return dcmp(Cross(a1 - p, a2 - p)) == 0 && dcmp(Dot(a1 - p, a2 - p)) < 0;
 }
+
+// 判断点是否在三角形内
+bool pointInTriangle(Point& p, Point& v1, Point& v2, Point& v3) {
+	// 判断点与三角形顶点连线与三角形对应的两条边位置关系
+	if (Cross(v2 - v1, p - v1)*Cross(v3 - v1, p - v1) <= 0
+		&& Cross(v3 - v2, p - v2)*Cross(v1 - v2, p - v2) <= 0)
+		return true;
+	return false;
+}
+
+// 凸包
+bool cmp(Point a, Point b) { if (a.x == b.x) return a.y < b.y;     return a.x < b.x; }
+int ConvexHull(Point* p, int n, Point* ch) {
+	sort(p, p + n, cmp);
+	int m = 0;
+	Point vec1, vec2;
+	for (int i = 0; i < n; i++) {
+		while (m > 1) {
+			vec1 = ch[m - 1] - ch[m - 2];
+			vec2 = p[i] - ch[m - 1];
+			if (Cross(vec1, vec2) <= 0)
+				m--;
+			else break;
+		}
+		ch[m++] = p[i];
+	}
+	int k = m;
+	for (int i = n - 2; i >= 0; i--) {
+		while (m > k) {//一开始已经有1个点   
+			vec1 = ch[m - 1] - ch[m - 2];
+			vec2 = p[i] - ch[m - 2];
+			if (Cross(vec1, vec2) <= 0)
+				m--;
+			else break;
+		}
+		ch[m++] = p[i];
+	}
+	if (n > 1) m--;
+	return m;
+}

@@ -337,6 +337,23 @@ struct Tarjan{
 //带路径压缩的找根结点函数 
 int find(int x){return root[x]==x?x:root[x]=find(root[x]);} 
 
+// 带权的并查集
+// 考虑点集中存在互斥的两类点，给出部分属于同一(或不同)类的两个点的信息，维护一个数据结构，能快速回答查询：
+// 给定两个点，判断他们的关系：1.属于同类 2.分别属于两个互斥的类 3.还不能判断
+// 基础版的并查集中，我们用root[x]指向"节点x所在集合"的代表节点，
+// 这里增加一个w[x]表示与其的关系,1表示不同类，0表示同一类。
+// （这里的结点合并是抽象的合并，合并后在同一"集合"里的点之间的关系是完全确定的，合并的"集合"可以包含不同类的点）
+// 给定节点 u, v 以及他们的关系 e = {0,1}. 
+// 出现矛盾当且仅当: root[u]==root[v](已经在同一个拓扑集合), 并且 e ^ w[u] ^ w[v] == 1 
+// 若 root[u]！=root[v] 则合， 并令 root[root[v]] = root[u], w[root[v]] = e ^ w[u] ^ w[v] 
+int root[maxn], w[maxn];
+int find(int x) {
+	if (root[x] == x) return x;
+	int r = find(root[x]);
+	w[x] ^= w[root[x]];
+	return root[x] = r;
+}
+
 // 2-sat(2-satisfiability)
 // 该类问题抽象为：有一系列布尔型变量X={x1,x2,...,xi},其中某些变量对存在约束关系如xi!=xj为真，问是否存在满足约束的合法解。
 struct TwoSAT {
