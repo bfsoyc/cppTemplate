@@ -33,7 +33,7 @@ LL L = 0, R = 50;
 while (L + 1 < R) {
 	LL len = (R - L + 1) / 3;
 	LL mid1 = L + len, mid2 = mid1 + len;
-	if (f(mid1)>f(mid2)) { // f(mid1) < f(mid2)
+	if (f(mid1)>f(mid2)) { // f(mid1) >= f(mid2) 时，最小值一定不在 [L,mid1], 类似地 f(mid1) <= f(mid2) 时, 最小值一定不在[mid2,R]
 		L = mid1;
 	}
 	else {
@@ -41,7 +41,7 @@ while (L + 1 < R) {
 		else R = mid2;
 	}
 }
-f(L), f(R);// 额外判断 L 与 R
+LL ans = min( f(L), f(R));// 额外判断 L 与 R
 
 // 计算后缀数组 O(nlogn)
 int cntA[maxn],cntB[maxn],rnk[maxn],A[maxn],B[maxn],tsa[maxn]; // 基数排序辅助数组
@@ -60,8 +60,8 @@ void getSuffixArray(int n){
     }// 此处rnk得到对单字母(长度为1的子串）的序， aabaaaab 得到 11211112
     for (int l = 1; rnk[sa[n]] < n; l <<= 1){
 		// 将（已排序的）长度为L的子串构成长度为2*L的子串，用双关键字排序
-        for (int i = 0; i <= n; i ++) cntA[i] = 0;
-        for (int i = 0; i <= n; i ++) cntB[i] = 0;
+        for (int i = 0; i <= maxC; i ++) cntA[i] = 0;
+        for (int i = 0; i <= maxC; i ++) cntB[i] = 0;
         for (int i = 1; i <= n; i ++)
         {
             cntA[A[i] = rnk[i]] ++;
@@ -79,8 +79,8 @@ void getSuffixArray(int n){
     }// 此处得到后缀数组suffix array 及其 rank
     for (int i = 1, j = 0; i <= n; i ++){
 		// 基于这样一个事实 suffix(k-1) 排在 suffix(i-1)(rank[i-1])的前一位，那么suffix(k)肯定在suffix(i)前,他们最大前缀是H[rank[i-1]]-1
-		// 故H[rank[i]] >= H[rank[i-1]-1];
-        if (j) j --; // 相当于初始化为 height[rnk[i-1]]
+		// 故H[rank[i]] >= H[rank[i-1]]-1;
+        if (j) j --; // 相当于初始化为 height[rnk[i-1]]-1
         while (ch[i + j] == ch[sa[rnk[i] - 1] + j]) j ++;
 		// 当前计算Height of suffix(i), ch[i+j]是suffix(i)的第j+1个字符，尽管可能还没计算H[rank[i]-1]，但是我们已经知道他们最大前缀至少是j了,继续往后比较知道不相同字符为止
         height[rnk[i]] = j;

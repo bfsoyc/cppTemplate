@@ -293,6 +293,49 @@ struct QuadTree{
 	}
 };
 
+// palindromic tree
+// 回文树 O(n*sigma)， sigma是字符集大小（通常为26),一种状态机类数据结构，每种状态表示一种回文串，总的状态数O(n)
+char S[maxn];
+int len[maxn], trans[maxn][26], slink[maxn], NEXT_FREE_IDX;
+// len[i]: 状态i表示的回文串长度， trans: 状态转移指针， slink[maxn]: suffix-link 失配指针（fail)
+int new_state(int length) {
+	len[NEXT_FREE_IDX] = length;
+	for (int i(0); i < 26; i++) trans[NEXT_FREE_IDX][i] = -1;
+	return NEXT_FREE_IDX++;
+}
+int init() {
+	NEXT_FREE_IDX = 0;
+	int s1 = new_state(0);	//	中心为空串的回文串（长度为偶数）的开始状态
+	int s2 = new_state(-1);	// 长度为奇数的回文串的开始状态,长度设置为-1是为了后面代码统一上的便利
+	slink[s1] = s2;	// 等价于 slink[0] = 1;
+	return s1;
+}
+int get_fail(int pos, int u) {
+	while (S[pos - len[u] - 1] != S[pos]) u = slink[u];
+	return u;
+}
+int add_char(int pos, int u) {	// 从状态u插入字符S[pos]
+	int c = S[pos] - 'a';
+	int mat = get_fail(pos, u);	// 沿着slink找到第一个match的状态。
+	if (trans[mat][c] == -1) {	// 如果不存在该状态，则新建结点
+		int v = new_state(len[mat] + 2);	// 长度加2
+		trans[mat][c] = v;
+		if (len[v] == 1) slink[v] = 0;	// 单字符构成的回文的前缀链指向应该是空串回文
+		else slink[v] = trans[get_fail(pos, slink[mat])][c];	//总是存在的(除非mat==1,等价于当前len为1）
+	}
+	return trans[mat][c];
+}
+int getDistinctPalindromic() {	// 获得本质不同的回文串数目
+								// S 必须从下表1开始
+	S[0] = '#';
+	int n = strlen(&S[1]);
+	int last = init();
+	for (int i(1); i <= n; i++) {
+		last = add_char(i, last);
+	}
+	return NEXT_FREE_IDX - 2;
+}
+
 // 树状数组(二叉索引树)
 #define lowbit(x) (x&-x)
 LL C[maxn],sz; // 辅助数组C初始化为0，n次add操作将需要维护的数组录入。 由于C存放的是前缀和，注意溢出。 ！！sz要初始化

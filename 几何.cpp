@@ -78,7 +78,7 @@ double includedAngle( Vector& a, Vector& b){
 }
 
 double TriagnleCircleIntersectionArea( Circle& C, Point& A, Point& B, bool inner){
-	// 计算圆C(圆心为c) 与三角形 cAB 相交的面积，请确保线段AB完全不在圆内或完全不在圆外，利用参数inner传递
+	// 计算圆C(圆心为c) 与三角形 cAB 相交的面积，请确保线段AB与圆不相交（穿过圆周），利用参数inner传递
 	if( inner )
 		return 0.5*Cross(A-C.c, B-C.c ); // 这里计算有向面积，方向自行排序
 	else{
@@ -97,11 +97,11 @@ int getCircleCircleIntersection( Circle C1, Circle C2, vector<Point>& sol, vecto
 		return 0; // 圆心重合半径不同
 	}
 	if( dcmp( C1.r+C2.r-d ) < 0 ) return 0; // 外离
-	if( dcmp( fabs(C1.r-C2.r)-d) > 0 ) return 0; // 相切
+	if( dcmp( fabs(C1.r-C2.r)-d) > 0 ) return 0; // 内含
 
 	double a = angle( C2.c-C1.c );	// 向量C1C2的极角
-	double da = acos( (C1.r*C1.r+d*d-C2.r*C2.r)/(2*C1.r*d) );
-	// C1C2 到C1P1的角
+	double da = acos( (C1.r*C1.r+d*d-C2.r*C2.r)/(2*C1.r*d) );// 余弦定理求 C1C2 到C1P1的角
+
 	Point p1 = C1.point(a-da), p2 = C1.point(a+da);
 
 	agl.clear();
@@ -118,7 +118,7 @@ int getCircleCircleIntersection( Circle C1, Circle C2, vector<Point>& sol, vecto
 bool SegmentProperIntersection(Point a1, Point a2, Point b1, Point b2) {
 	double c1 = Cross(a2 - a1, b1 - a1), c2 = Cross(a2 - a1, b2 - a1),
 		c3 = Cross(b2 - b1, a1 - b1), c4 = Cross(b2 - b1, a2 - b1);
-	return dcmp(c1)*dcmp(c2) < 0 && dcmp(c3)*dcmp(c4) < 0;
+	return dcmp(c1)*dcmp(c2) < 0 && dcmp(c3)*dcmp(c4) < 0; // 只是端点触碰不算
 }
 bool OnSegment(Point p, Point a1, Point a2) {
 	return dcmp(Cross(a1 - p, a2 - p)) == 0 && dcmp(Dot(a1 - p, a2 - p)) < 0;
@@ -130,6 +130,24 @@ bool pointInTriangle(Point& p, Point& v1, Point& v2, Point& v3) {
 	if (Cross(v2 - v1, p - v1)*Cross(v3 - v1, p - v1) <= 0
 		&& Cross(v3 - v2, p - v2)*Cross(v1 - v2, p - v2) <= 0)
 		return true;
+	return false;
+}
+
+// 判断两个三角形是否有公共面积
+bool triangleIntersection(Point* tri1, Point* tri2) {
+	// 判断两个三角形是否相互包含
+	if (pointInTriangle(tri1[0], tri2[0], tri2[1], tri2[2])
+		&& pointInTriangle(tri1[1], tri2[0], tri2[1], tri2[2])
+		&& pointInTriangle(tri1[2], tri2[0], tri2[1], tri2[2]))	return true;
+	if (pointInTriangle(tri2[0], tri1[0], tri1[1], tri1[2])
+		&& pointInTriangle(tri2[1], tri1[0], tri1[1], tri1[2])
+		&& pointInTriangle(tri2[2], tri1[0], tri1[1], tri1[2]))	return true;
+	// 如果不是相互包含，必然有两个线段有交（非端点交）
+	for (int i(0); i < 3; i++)
+		for (int j(0); j < 3; j++) {
+			if (SegmentProperIntersection(tri1[i], tri1[(i + 1) % 3], tri2[j], tri2[(j + 1) % 3]))
+				return true;
+		}
 	return false;
 }
 

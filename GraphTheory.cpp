@@ -34,8 +34,9 @@ void Dijkstra(int st){
 	}
 }
 
-//最小生成树 prim 算法，连通图上的所有 N 个点，并且使得连接的线段的总长最短，
+//最小生成树 prim 算法，连通图上的所有 N 个点，并且使得连接的线段的总长最短. 
 // 复杂度 O(mlogm)， m是边数
+//另一种kruskal算法是按边升序来选合法边
 int inTree[maxn]; //		标记结点是否在生成树内
 int prim(int n){	
 	int d(0);
@@ -46,7 +47,7 @@ int prim(int n){
 		q.push( pii( edges[h].w, edges[h].v ) );
 	
 	for( int i(1); i < n ; i++ ){ // 每次找得1段，做 n-1次循环 
-		while( inTree[q.top().second] ) q.pop(); // 若存在0权边，可能runtime error吗?
+		while( inTree[q.top().second] ) q.pop(); 
 		int p = q.top().second;
 		inTree[p] = 1; d += q.top().first; q.pop();
 		for( int h = head[p]; h!=-1; h=edges[h].next ) // 更新各结点到生成树的距离
@@ -54,6 +55,7 @@ int prim(int n){
 	}
 	return d;
 }
+
 
 // 最大流算法 限时吃紧的情况下请尽量压缩n的大小，测试样例未必极端
 int head[maxn],p[maxn],d[maxn],cur[maxn],num[maxn];
@@ -164,6 +166,9 @@ struct ISAP{
 };
 
 //最大流问题 Dinic
+//Dinic最大流的增广策略是，每次找最短的增广路（通过构建层次图实现），同时通过贪心算法，一次dfs内将
+//当前长度的增广流量全部求出。构建一次层次图以及dfs的复杂度都是O(n + m)，而每次增广路的长度都加一，
+//增广路长度不会超过n，总复杂度是O((n + m)*n)的
 struct Edge{ 
 	int from, to, cap, flow; 
 	Edge( int fr,int t, int c, int fl ):from(fr),to(t),cap(c),flow(fl){}; 
@@ -271,7 +276,7 @@ vector<int> getDFSOrder( int rootIdx, int *headIdx, int *DI, int *DO, int* L ){
 	return D;
 }
 
-// 最近公共祖先的在线查询算法 <O(N*logN,1)>
+// 最近公共祖先的在线查询算法 <O(N*logN),O(1)>
 int E[maxn*2],I[maxn],O[maxn],L[maxn],EL[maxn*2];
 struct LCA{
 	// E 是DFS搜索的欧拉序,I记录节点第一次出现(进入）在E中的下标，O记录节点最后一次出现（离开）在E中的下标。	
@@ -332,6 +337,40 @@ struct Tarjan{
 				lca[h] = lca[h^1] = find( queries[h].v ) ;
 	}
 };
+
+// 找到树上两条路径的交
+// 将路径(u,v)表示为(u,v,lca(u,v))
+vector<int> intersectionPath(int u1, int v1, int ca1, int u2, int v2, int ca2) {	// i，j表示两条路径, 结果存于u，v,ca
+	int U[2] = { u1,u2 }, V[2] = { v1,v2 }, CA[2] = { ca1,ca2 };
+	int u, v, ca;
+	u = v = ca = -1;
+	if (CA[0] != -1 && CA[1] != -1) {
+		int lca = solver.lca(CA[0], CA[1]);
+		if (lca == CA[0] || lca == CA[1]) { //才可能有交
+											// 计算 (CA[0], U[0] ) 与 (CA[1], U[1] ), (CA[1], V[1])的交
+			int up = (L[CA[0]] < L[CA[1]] ? CA[1] : CA[0]);
+			int lca1 = solver.lca(U[0], U[1]);	// solver 是LCA类的实例
+			int lca2 = solver.lca(U[0], V[1]);
+			if (L[lca1] >= L[up] || L[lca2] >= L[up]) {// 有交
+				ca = up;
+				u = (L[lca2] >= L[lca1] ? lca2 : lca1);
+			}
+			// 计算 (CA[0], V[0] ) 与 (CA[1], U[1] ), (CA[1], V[1])的交
+			lca1 = solver.lca(V[0], U[1]);
+			lca2 = solver.lca(V[0], V[1]);
+			if (L[lca1] >= L[up] || L[lca2] >= L[up]) {// 有交
+				ca = up;
+				v = (L[lca2] >= L[lca1] ? lca2 : lca1);
+			}
+		}
+	}
+	if (ca != -1) {
+		if (u == -1) u = ca;
+		if (v == -1) v = ca;
+	}
+	vector<int> ret;	ret.push_back(u), ret.push_back(v), ret.push_back(ca);
+	return ret;
+}
 
 // 并查集 
 //带路径压缩的找根结点函数 
