@@ -491,14 +491,14 @@ bool getBipartiteGraph( int n){ // 每次调用前color需要初始化
 // 二分图的最大匹配 匈牙利算法 
 vector<int> G[maxn];
 int used[maxn],mat[maxn]; // mat[i] 表示左子图中与右子图结点i匹配的结点编号
-bool hungery(int u){ // mat初始化1次， used在每次调用hungery前（不包括递归调用）初始化
+bool hungarian(int u){ // mat初始化1次， used在每次调用hungarian前（不包括递归调用）初始化
 	for(int i=0;i < G[u].size();i++){ 
 		int v = G[u][i]; // 链表
 		//c 是其中一个与 u(a)相连的右子图里的点（即他们右子图的 v 与左子图的 u 存在边） 
 		if(!used[v]){//对于每个 a 而言，判断 v 是否访问过，属于dfs剪枝
 			used[v] = 1;			
 		//2 种情况任一成立则总匹配数加一，就是 main函数里的 sum++
-			if(mat[v]==-1||hungery(mat[v])){ //这两个条件不能交换位置
+			if(mat[v]==-1|| hungarian(mat[v])){ //这两个条件不能交换位置
 				//1. v 未被匹配， 直接将u与v匹配
 				//2. 左子图中的mat[v]找到右子图中v以外的匹配点k,即有更新mat[k]=mat[v], mat[v] = u
 				mat[v]=u; 

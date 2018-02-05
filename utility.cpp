@@ -472,8 +472,18 @@ void solve() {
 // %[aB'] 匹配a、B、'中一员，贪婪性
 // %[^a] 匹配非a的任意字符，并且停止读入，贪婪性
 // %4c 匹配4字节长度的字符（%[width]type）
+// 输出数字的前导0可以用 {%0[width]type}
 
 // gets(char* s)当读取到文档结尾时返回NULL
 
 // algorithm中 lower_bound使用:
 // int pos = upper_bound(a,a+n,k)-a;
+
+// sort的比较函数可以单独定义一个布尔型函数，set、map类的对比函数则需封装一下
+/*
+struct Cmp1 {	// 必须在一个类内重载()，而且必须时const member function
+	bool operator() (const pair<int, int>& a, const pair<int, int>& b) const {
+		if (a.first == b.first) return a.second < b.second;	// 只要pair不完全相同，就不相同，这个大小符号随意
+		return a.first < b.first;
+	}
+};*/

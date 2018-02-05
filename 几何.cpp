@@ -120,8 +120,8 @@ bool SegmentProperIntersection(Point a1, Point a2, Point b1, Point b2) {
 		c3 = Cross(b2 - b1, a1 - b1), c4 = Cross(b2 - b1, a2 - b1);
 	return dcmp(c1)*dcmp(c2) < 0 && dcmp(c3)*dcmp(c4) < 0; // 只是端点触碰不算
 }
-bool OnSegment(Point p, Point a1, Point a2) {
-	return dcmp(Cross(a1 - p, a2 - p)) == 0 && dcmp(Dot(a1 - p, a2 - p)) < 0;
+bool OnSegment(Point p, Point a1, Point a2) {	// proper on 
+	return dcmp(Cross(a1 - p, a2 - p)) == 0 && dcmp(Dot(a1 - p, a2 - p)) < 0; // 考虑端点,则<=
 }
 
 // 判断点是否在三角形内
