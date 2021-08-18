@@ -267,6 +267,9 @@ int substrSum(){ // 根据拓扑序递推不同子串的和。
 
 
 // KMP 匹配算法， 复杂度O(n), f 为失配函数
+// The failure function f[i] can be interpreted as the next index to compare if we fail to match index i for the template string.
+// Another intuitive explaination for f[i] is the maximum length of prefix, which equals to the suffix of T[0:i-1].
+// s.t. the prefix can't be the T[0:i-1] itself.
 void getFail( char* T, int* f){ // T 为模板串
 	f[0] = 0, f[1] = 0;
 	int m = strlen(T);
